@@ -34,6 +34,19 @@ export class Preloader extends Scene
 
         this.load.image('logo', 'logo.png');
         this.load.image('star', 'star.png');
+
+        // Tilesets
+        this.load.setPath('assets/tileSets');
+        this.load.image('ts_terrains_fences','ts_terrains_fences.png');
+        this.load.image('ts_city_terrains','ts_city_terrains.png');
+        this.load.image('ts_vehicles','ts_vehicles.png');
+        this.load.image('ts_city_props','ts_city_props.png');
+        this.load.image('ts_office','ts_office.png');
+        this.load.image('ts_post_office','ts_post_office.png');
+
+        // TileMaps
+        this.load.setPath('assets/tileMaps');
+        this.load.tilemapTiledJSON('outdoor', 'Outdoor.json')
     }
 
     create ()

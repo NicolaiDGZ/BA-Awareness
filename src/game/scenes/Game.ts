@@ -17,20 +17,20 @@ export class Game extends Scene
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
 
-        this.background = this.add.image(512, 384, 'background');
-        this.background.setAlpha(0.5);
-
-        this.gameText = this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);
-
-        EventBus.emit('current-scene-ready', this);
+        this.loadTiles();
     }
 
-    changeScene ()
-    {
-        this.scene.start('GameOver');
+    loadTiles(){
+        const map = this.make.tilemap({ key: 'outdoor'});
+        const ts_city_terrains = map.addTilesetImage('ts_city_terrains');
+        const ts_terrains_fences = map.addTilesetImage('ts_terrains_fences');
+        const ts_vehicles = map.addTilesetImage('ts_vehicles');
+        const ts_city_props = map.addTilesetImage('ts_city_props');
+        const ts_office = map.addTilesetImage('ts_office');
+        const ts_post_office = map.addTilesetImage('ts_post_office');
+        map.createLayer('Floor', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
+        map.createLayer('Office', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
+        map.createLayer('CityProps',[ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
+        map.createLayer('CityProps2', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
     }
 }
