@@ -44,6 +44,8 @@ export class Preloader extends Scene
         this.load.image('ts_office','ts_office.png');
         this.load.image('ts_post_office','ts_post_office.png');
 
+        this.load.spritesheet('ts_player','ts_character.png', { frameWidth: 64, frameHeight: 64});
+
         // TileMaps
         this.load.setPath('assets/tileMaps');
         this.load.tilemapTiledJSON('outdoor', 'Outdoor.json')

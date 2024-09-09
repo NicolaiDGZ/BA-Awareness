@@ -20,6 +20,13 @@ const config: Phaser.Types.Core.GameConfig = {
         MainGame,
         GameOver
     ],
+    physics: {
+        default: 'matter',
+        matter: {
+            gravity: { x:0, y:0},
+            debug: true
+        }
+    },
     scale: { 
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
