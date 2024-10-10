@@ -35,6 +35,8 @@ export class Preloader extends Scene
         this.load.image('logo', 'logo.png');
         this.load.image('star', 'star.png');
 
+        this.load.image('tasks','ui/tasks.png')
+
         // Tilesets
         this.load.setPath('assets/tileSets');
         this.load.image('ts_terrains_fences','ts_terrains_fences.png');
