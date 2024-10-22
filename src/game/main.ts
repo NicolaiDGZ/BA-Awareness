@@ -4,8 +4,11 @@ import { Game as MainGame } from './scenes/Game';
 import { MainMenu } from './scenes/MainMenu';
 import { AUTO, Game } from 'phaser';
 import { Preloader } from './scenes/Preloader';
-
+import { VisitorPass } from './scenes/VisitorPass.ts';
 import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
+import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+import { KeyPad } from './scenes/KeyPad';
+import { InfoBoxScene } from './scenes/InfoBoxScene';
 
 
 //  Find out more information about the Game Config at:
@@ -20,7 +23,10 @@ const config: Phaser.Types.Core.GameConfig = {
         Boot,
         Preloader,
         MainMenu,
+        VisitorPass,
+        KeyPad,
         MainGame,
+        InfoBoxScene,
         GameOver
     ],
     physics: {
@@ -29,6 +35,17 @@ const config: Phaser.Types.Core.GameConfig = {
             gravity: { x:0, y:0}
             //,debug: true
         }
+    },
+    dom: {
+        createContainer: true
+    },
+    plugins: {
+        scene: [{
+            key: 'rexUI',
+            plugin: UIPlugin,
+            mapping: 'rexUI'
+        },
+        ]
     },
     scale: { 
         mode: Phaser.Scale.FIT,

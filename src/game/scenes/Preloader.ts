@@ -32,10 +32,16 @@ export class Preloader extends Scene
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
 
-        this.load.image('logo', 'logo.png');
-        this.load.image('star', 'star.png');
+        this.load.image('cv', 'cv.png');
+        this.load.image('visitor_pass', 'visitor_pass.png');
+
+        this.load.image('worker1', 'worker1.png');
+        this.load.image('worker2', 'worker2.png');
 
         this.load.image('tasks','ui/tasks.png')
+        this.load.image('cb_false','ui/checkbox_false.png');
+        this.load.image('cb_true','ui/checkbox_true.png');
+        this.load.image('nothingtofind','ui/nothingtofind.png');
 
         // Tilesets
         this.load.setPath('assets/tileSets');
