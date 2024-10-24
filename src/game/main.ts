@@ -2,12 +2,11 @@ import { Boot } from './scenes/Boot';
 import { GameOver } from './scenes/GameOver';
 import { Game as MainGame } from './scenes/Game';
 import { MainMenu } from './scenes/MainMenu';
-import { AUTO, Game } from 'phaser';
+import { AUTO, Game, Scene } from 'phaser';
 import { Preloader } from './scenes/Preloader';
 import { VisitorPass } from './scenes/VisitorPass.ts';
-import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
-import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import { KeyPad } from './scenes/KeyPad';
+import InputTextPlugin from 'phaser3-rex-plugins/plugins/inputtext-plugin.js';
 import { InfoBoxScene } from './scenes/InfoBoxScene';
 
 
@@ -40,10 +39,11 @@ const config: Phaser.Types.Core.GameConfig = {
         createContainer: true
     },
     plugins: {
-        scene: [{
-            key: 'rexUI',
-            plugin: UIPlugin,
-            mapping: 'rexUI'
+        global: [{
+            key: 'rexInputTextPlugin',
+            plugin: InputTextPlugin,
+            start: true
+            //mapping: 'rexUI'
         },
         ]
     },
@@ -56,7 +56,6 @@ const config: Phaser.Types.Core.GameConfig = {
 const StartGame = (parent: string) => {
 
     return new Game({ ...config, parent });
-
 }
 
 export default StartGame;

@@ -37,6 +37,7 @@ export class Preloader extends Scene
 
         this.load.image('worker1', 'worker1.png');
         this.load.image('worker2', 'worker2.png');
+        this.load.image('desk', 'desk.png');
 
         this.load.image('tasks','ui/tasks.png')
         this.load.image('cb_false','ui/checkbox_false.png');

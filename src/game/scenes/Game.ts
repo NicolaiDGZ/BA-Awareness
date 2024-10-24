@@ -205,7 +205,9 @@ export class Game extends Scene
                     case 4:{
                         //Van
                         if(this.secondStage){
-                            this.scene.start('GameOver');
+                            this.scene.stop('Game');
+                            this.scene.stop('InfoBoxScene');
+                            this.scene.start('VisitorPass');
                         }else{
                             const text = this.add.text(1024/2, 768-100, 'Du musst erst die anderen Missionen erfüllen', { font: '24px Arial', color: '#fff' });
                             text.setVisible(true);
