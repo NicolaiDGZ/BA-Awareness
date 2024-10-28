@@ -266,8 +266,8 @@ export class Game extends Scene
         this.matter.world.setBounds(0,32,2016,1408-32);
 
         //Load workers
-        this.matter.add.sprite(28*32,34*32,'worker1').setDepth(102).setScale(2,2).setStatic(true);
-        this.matter.add.sprite(30*32,34*32,'worker2').setDepth(102).setScale(2,2).setStatic(true);
+        this.matter.add.sprite(28*32,34*32,'worker1').setScale(2,2).setStatic(true);
+        this.matter.add.sprite(30*32,34*32,'worker2').setScale(2,2).setStatic(true);
     }
 
     loadPlayer(){

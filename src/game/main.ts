@@ -1,5 +1,5 @@
 import { Boot } from './scenes/Boot';
-import { GameOver } from './scenes/GameOver';
+import { InfoScreen } from './scenes/InfoScreen.ts';
 import { Game as MainGame } from './scenes/Game';
 import { MainMenu } from './scenes/MainMenu';
 import { AUTO, Game, Scene } from 'phaser';
@@ -26,7 +26,7 @@ const config: Phaser.Types.Core.GameConfig = {
         KeyPad,
         MainGame,
         InfoBoxScene,
-        GameOver
+        InfoScreen
     ],
     physics: {
         default: 'matter',

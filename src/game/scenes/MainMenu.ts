@@ -41,8 +41,8 @@ export class MainMenu extends Scene {
 
     private createButtons() {
         const buttonData = [
-            { text: 'Play', scene: 'GameOver' },
-            { text: 'Controls', scene: 'GameOver' },
+            { text: 'Play', scene: 'InfoScreen' },
+            { text: 'Controls', scene: 'InfoScreen' },
             { text: 'Credits', scene: 'VisitorPass' }
         ];
 
@@ -66,7 +66,7 @@ export class MainMenu extends Scene {
                         title: 'Informationen sammeln',
                         message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',
                         scene: 'Game'});
-                }else if(data.scene === 'GameOver'){
+                }else if(data.scene === 'InfoScreen'){
                     this.scene.start(data.scene, {
                         title: 'Informationen sammeln',
                         message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',

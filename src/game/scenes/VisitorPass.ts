@@ -2,15 +2,23 @@ import { Scene } from "phaser";
 
 
 export class VisitorPass extends Scene {
+    WINumber: string;
+    WIName: string;
+    WIFirstname: string;
+    WIMail: string;
+    WIValid: string;
     constructor() {
         super({ key: 'VisitorPass' });
     }
-
-    preload(){
-        this.load.plugin('rexinputtextplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexinputtextplugin.min.js', true);
-    }
     
     create() {
+        //Helptext
+        this.WINumber = "Fehler bei der Nummer";
+        this.WIName = "Fehler bei dem Nachnamen";
+        this.WIFirstname = "Fehler bei dem Vornamen";
+        this.WIValid = "Fehler bei dem Gültigkeitsdatum";
+        this.WIMail = "Fehler bei der Mail";
+
         this.add.image(0,0,'desk').setOrigin(0,0).setDepth(0);
         const config = {
             type: 'text',                // Typ des Eingabefelds
@@ -38,25 +46,30 @@ export class VisitorPass extends Scene {
     }
 
     confirm(number:string,name:string,firstname:string,mail:string,valid:string){
-        if(number != 'JF-331116' ){
-            //number wrong
-            this.wrongInput(" der Nummer");
-        }else if(name != 'Federer'){
+        if(name != 'Federer'){
             //name wrong
-            this.wrongInput(" dem Nachnamen");
+            this.wrongInput(this.WIName);
+            this.WIName = "Fehler bei dem Nachnamen\nHinweis: Schaue nochmal in die Notizen, als welche Person du dich ausgeben möchtest.";
         }else if(firstname != 'Jonas'){
             //firstname wrong
-            this.wrongInput(" dem Vornamen");
+            this.wrongInput(this.WIFirstname);
+            this.WIFirstname = "Fehler bei dem Vornamen\nHinweis: Schaue nochmal in die Notizen, als welche Person du dich ausgeben möchtest.";
         }else if(mail != 'jonas.federer@pdg.de'){
             //mail wrong
-            this.wrongInput(" der Mail");
+            this.wrongInput(this.WIMail);
+            this.WIMail = "Fehler bei der Mail\nHinweis: Schaue nochmal, ob du die Email-Adresse schon irgendwo gefunden hast.";
         }else if(valid != '16.11.2033'){
             //valid wrong
-            this.wrongInput(" dem Datum");
+            this.wrongInput(this.WIValid);
+            this.WIValid = "Fehler bei dem Datum\nHinweis: Schaue nochmal in den Notizen, wann der Mitarbeiter erwartet wird.";
+        }else if(number != 'JF-331116' ){
+            //number wrong
+            this.wrongInput(this.WINumber);
+            this.WINumber = "Fehler bei der Nummer\nHinweis: Schaue nochmal in den Besucherausweis, wie die Nummer aufgebaut ist.";
         }else{
             //Everything right!!
             console.log('All right')
-            this.wrongInput(" keinem Element. Alles richtig!! Glückwunsch.")
+            this.wrongInput("Alles richtig.");
         }
     }
 
@@ -110,7 +123,7 @@ export class VisitorPass extends Scene {
         const middlex = 1024/2;
         const middley = 768/2;
 
-        const infotext = this.add.text(middlex, middley, 'Fehler bei' + input, {
+        const infotext = this.add.text(middlex, middley, input, {
             fontSize: '24px',
             color: '#000000',
             fontFamily: 'Arial',
@@ -120,9 +133,9 @@ export class VisitorPass extends Scene {
         // Graphics-Objekt für den Button erstellen
         const rectangle = this.add.graphics()
             .fillStyle(0xFF5252, 1)
-            .fillRoundedRect(middlex - infotext.width / 2 - 25, middley - 25, infotext.width + 50, 50, 15)
+            .fillRoundedRect(middlex - infotext.width / 2 - 25, middley - infotext.height / 2 - 25, infotext.width + 50, infotext.height + 50, 15)
             .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(middlex - infotext.width /2 - 25, middley - 25, infotext.width + 50, 50, 15);
+            .strokeRoundedRect(middlex - infotext.width /2 - 25, middley - infotext.height / 2 - 25, infotext.width + 50, infotext.height + 50, 15);
     
         // Button-Text hinzufügen und zentrieren
         
