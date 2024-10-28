@@ -168,7 +168,7 @@ export class Game extends Scene
                         const image = this.add.image(1024/2,768/2,'visitor_pass');
                         image.setScrollFactor(0);
                         image.setDepth(99);
-                        this.time.delayedCall(3000,()=>{image.setVisible(false);image.destroy;});
+                        this.createCloseButton(image);
                         this.allContainersChecked[0] = true;
                         if(this.allContainersChecked.every(Boolean)){
                             taskBox.completeTask(0);
@@ -181,7 +181,7 @@ export class Game extends Scene
                         const image = this.add.image(1024/2,768/2,'nothingtofind');
                         image.setScrollFactor(0);
                         image.setDepth(99);
-                        this.time.delayedCall(3000,()=>{image.setVisible(false);image.destroy;})
+                        this.createCloseButton(image);
                         this.allContainersChecked[1] = true;
                         if(this.allContainersChecked.every(Boolean)){
                             taskBox.completeTask(0);
@@ -194,8 +194,10 @@ export class Game extends Scene
                         const image = this.add.image(1024/2,768/2,'cv');
                         image.setScrollFactor(0);
                         image.setDepth(99);
-                        this.time.delayedCall(8000,()=>{image.setVisible(false);image.destroy;})
                         this.allContainersChecked[2] = true;
+
+                        this.createCloseButton(image);
+                        
                         if(this.allContainersChecked.every(Boolean)){
                             taskBox.completeTask(0);
                             this.addTask();
@@ -228,6 +230,51 @@ export class Game extends Scene
                 }
             }
         }
+    }
+
+    createCloseButton(image: Phaser.GameObjects.Image){
+        // Button-Koordinaten berechnen (unterhalb des Bildes)
+        const buttonx = image.x - 80; // Zentriere den Button horizontal, daher -50
+        const buttony = image.y + image.height / 2 + 50; // 50px unter dem Bild
+    
+        // Graphics-Objekt für den Button erstellen
+        const closeButton = this.add.graphics()
+            .fillStyle(0xFF5252, 1)
+            .fillRoundedRect(buttonx, buttony, 160, 50, 15)
+            .lineStyle(5, 0x0, 1)
+            .strokeRoundedRect(buttonx, buttony, 160, 50, 15)
+            .setScrollFactor(0)
+            .setDepth(100);
+    
+        // Button-Text hinzufügen und zentrieren
+        const buttonText = this.add.text(buttonx + 80, buttony + 25, 'Schließen', {
+            fontSize: '24px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            align: 'center'
+        })
+            .setOrigin(0.5, 0.5)
+            .setScrollFactor(0)
+            .setDepth(100);
+    
+        // Add fake rectangele
+        const buttonContainer = this.add.rectangle(buttonx,buttony,160,50)
+            .setOrigin(0,0)
+            .setInteractive({ useHandCursor: true })
+            .setScrollFactor(0)
+            .setDepth(100);
+        // Button Klick-Event
+        buttonContainer.on('pointerdown', () => {
+            console.log("Close Button Clicked")
+            image.setVisible(false);
+            image.destroy();
+            buttonContainer.setVisible(false);
+            buttonText.setVisible(false);
+            closeButton.setVisible(false);
+            closeButton.destroy();
+            buttonContainer.destroy();
+            buttonText.destroy();
+        });
     }
     addTask() {
         if(taskBox.tasks.every(task => task.completed == true)){
