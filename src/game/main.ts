@@ -8,6 +8,8 @@ import { VisitorPass } from './scenes/VisitorPass.ts';
 import { KeyPad } from './scenes/KeyPad';
 import InputTextPlugin from 'phaser3-rex-plugins/plugins/inputtext-plugin.js';
 import { InfoBoxScene } from './scenes/InfoBoxScene';
+import { QuizScene } from './scenes/QuizScene.ts';
+import { RecapScene } from './scenes/RecapScene.ts';
 
 
 //  Find out more information about the Game Config at:
@@ -26,6 +28,8 @@ const config: Phaser.Types.Core.GameConfig = {
         KeyPad,
         MainGame,
         InfoBoxScene,
+        RecapScene,
+        //QuizScene,
         InfoScreen
     ],
     physics: {

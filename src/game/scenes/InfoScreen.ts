@@ -25,8 +25,9 @@ export class InfoScreen extends Scene
 
     create ()
     {
+        console.log("InfoScreen created.");
         this.camera = this.cameras.main
-        this.add.rectangle(0,0,1024,768,0x938556,1).setOrigin(0,0);
+        this.add.rectangle(0,0,1024,768,0x369ea6,1).setOrigin(0,0);
         //Title Text
         this.titleText = this.add.text(512, 100, this.title, {
             fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff',
