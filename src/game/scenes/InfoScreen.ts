@@ -25,6 +25,8 @@ export class InfoScreen extends Scene
 
     create ()
     {
+
+        const recactangewidth = 900;
         console.log("InfoScreen created.");
         this.camera = this.cameras.main
         this.add.rectangle(0,0,1024,768,0x369ea6,1).setOrigin(0,0);
@@ -37,22 +39,22 @@ export class InfoScreen extends Scene
         //Title Box
         const titlerectangle = this.add.graphics()
             .fillStyle(0xe9ddaf, 1)
-            .fillRoundedRect(this.titleText.x - this.titleText.width / 2 - 25, this.titleText.y - this.titleText.height / 2 - 25, this.titleText.width + 50, this.titleText.height + 50, 15)
+            .fillRoundedRect(this.titleText.x - this.titleText.width / 2 - 25, this.titleText.y - this.titleText.height / 2 - 25, recactangewidth, this.titleText.height + 50, 15)
             .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(this.titleText.x - this.titleText.width / 2 - 25, this.titleText.y - this.titleText.height / 2 - 25, this.titleText.width + 50, this.titleText.height + 50, 15);
+            .strokeRoundedRect(this.titleText.x - this.titleText.width / 2 - 25, this.titleText.y - this.titleText.height / 2 - 25, recactangewidth, this.titleText.height + 50, 15);
 
         //Main Text
-        this.maintext = this.add.text(512, 384, this.message, {
+        this.maintext = this.add.text(512, 440, this.message, {
             fontFamily: 'Arial Black', fontSize: 32, color: '#ffffff',
             stroke: '#000000', strokeThickness: 3,
-            align: 'center', wordWrap: { width: 800, useAdvancedWrap: true}
+            align: 'left', wordWrap: { width: 850, useAdvancedWrap: true}
         }).setOrigin(0.5).setDepth(100);
         //Main Box
         const mainrectangle = this.add.graphics()
             .fillStyle(0xe9ddaf, 1)
-            .fillRoundedRect(this.maintext.x - this.maintext.width / 2 - 25, this.maintext.y - this.maintext.height / 2 - 25, this.maintext.width + 50, this.maintext.height + 50, 15)
+            .fillRoundedRect(this.maintext.x - this.maintext.width / 2 - 25, this.maintext.y - this.maintext.height / 2 - 25, recactangewidth, this.maintext.height + 50, 15)
             .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(this.maintext.x - this.maintext.width / 2 - 25, this.maintext.y - this.maintext.height / 2 - 25, this.maintext.width + 50, this.maintext.height + 50, 15);
+            .strokeRoundedRect(this.maintext.x - this.maintext.width / 2 - 25, this.maintext.y - this.maintext.height / 2 - 25, recactangewidth, this.maintext.height + 50, 15);
         //Infotext
         this.infotext = this.add.text(1024/2, 768-50, 'Drücke die Leertaste um Fortzufahern', { font: '24px Arial', color: '#fff' })
         .setDepth(100).setOrigin(0.5);

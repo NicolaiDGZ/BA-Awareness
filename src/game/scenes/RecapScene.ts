@@ -8,7 +8,7 @@ export class RecapScene extends Scene {
 
     create(){
         this.add.image(0,0,"learnings").setOrigin(0,0);
-        this.add.rectangle(261,637,496,97,0xF,0.5)
+        this.add.rectangle(261,637,496,97)
             .setOrigin(0,0)
             .setInteractive()
             .on('pointerdown', () => this.continue());

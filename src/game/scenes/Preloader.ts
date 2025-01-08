@@ -44,6 +44,7 @@ export class Preloader extends Scene
         this.load.image('cb_false','ui/checkbox_false.png');
         this.load.image('cb_true','ui/checkbox_true.png');
         this.load.image('nothingtofind','ui/nothingtofind.png');
+        this.load.image('controls','ui/Controls.png');
 
         // Tilesets
         this.load.setPath('assets/tileSets');
@@ -54,11 +55,31 @@ export class Preloader extends Scene
         this.load.image('ts_office','ts_office.png');
         this.load.image('ts_post_office','ts_post_office.png');
 
-        this.load.spritesheet('ts_player','ts_character.png', { frameWidth: 64, frameHeight: 64});
+        this.load.spritesheet('ts_player','ts_player.png', { frameWidth: 32, frameHeight: 64});
+        //Indoor
+        this.load.setPath('assets/tileSets/Indoor');
+        this.load.image('ts_basement','ts_basement.png');
+        this.load.image('ts_bathroom','ts_bathroom.png');
+        this.load.image('ts_classroomAndLibrary','ts_classroomAndLibrary.png');
+        this.load.image('ts_generic','ts_generic.png');
+        this.load.image('ts_modernOffice','ts_modernOffice.png');
+        this.load.image('ts_museum','ts_museum.png');
+        this.load.spritesheet('ts_roomBuilder','ts_roomBuilder.png', { frameWidth: 32, frameHeight: 32});
+        this.load.image('ts_roomBuilderOffice','ts_roomBuilderOffice.png');
+        this.load.spritesheet('ts_a_turnstile','ts_a_turnstile.png', { frameWidth: 64, frameHeight: 96});
+        this.load.spritesheet('ts_a_coffee','ts_a_coffee.png', { frameWidth: 32, frameHeight: 32});
+        this.load.spritesheet('ts_char_1','ts_char_1.png', { frameWidth: 32, frameHeight: 64});
+        this.load.spritesheet('ts_char_2','ts_char_2.png', { frameWidth: 32, frameHeight: 64});
+        this.load.spritesheet('ts_char_3','ts_char_3.png', { frameWidth: 32, frameHeight: 64});
+
+
 
         // TileMaps
         this.load.setPath('assets/tileMaps');
         this.load.tilemapTiledJSON('outdoor', 'Outdoor.json')
+        
+        this.load.tilemapTiledJSON('indoor', 'Indoor.json')
+        this.load.tilemapTiledJSON('test', 'Test.json')
     }
 
     create ()

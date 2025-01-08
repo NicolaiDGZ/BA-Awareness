@@ -43,7 +43,8 @@ export class MainMenu extends Scene {
         const buttonData = [
             { text: 'Play', scene: 'InfoScreen' },
             { text: 'Controls', scene: 'RecapScene' },
-            { text: 'Credits', scene: 'VisitorPass' }
+            { text: 'Credits', scene: 'VisitorPass' },
+            { text: 'IndoorTest', scene: 'Indoor' }
         ];
 
         this.buttons = buttonData.map((data, index) => {
@@ -67,9 +68,12 @@ export class MainMenu extends Scene {
                 }else if(data.scene === 'InfoScreen'){
                     this.scene.start(data.scene, {
                         title: 'Informationen sammeln',
-                        message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',
+                        //message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',
+                        message: 'Als geschickter Social Engineer hast du ein klares Ziel: das Unternehmen G-Neric Corp zu infiltrieren. \nDoch der Zugang zum Firmengebäude ist nicht jedem gewährt – doch du bist bereit, jedes Schlupfloch zu finden. \nMit deinem Bus fährst du zum Gebäude, entschlossen, entscheidende Informationen aufzuspüren, die dir den Weg ins Innere ebnen. \n Viel Erfolg!',
                         scene: 'Game'});
                 }else if( data.scene === 'VisitorPass'){
+                    this.scene.start(data.scene);
+                }else if( data.scene === 'Indoor'){
                     this.scene.start(data.scene);
                 }
             });

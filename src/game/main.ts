@@ -10,6 +10,7 @@ import InputTextPlugin from 'phaser3-rex-plugins/plugins/inputtext-plugin.js';
 import { InfoBoxScene } from './scenes/InfoBoxScene';
 import { QuizScene } from './scenes/QuizScene.ts';
 import { RecapScene } from './scenes/RecapScene.ts';
+import { Indoor } from './scenes/Indoor.ts';
 
 
 //  Find out more information about the Game Config at:
@@ -19,7 +20,8 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1024,
     height: 768,
     parent: 'game-container',
-    backgroundColor: '#028af8',
+    backgroundColor: '#988f8a',
+    pixelArt: true,
     scene: [
         Boot,
         Preloader,
@@ -29,6 +31,7 @@ const config: Phaser.Types.Core.GameConfig = {
         MainGame,
         InfoBoxScene,
         RecapScene,
+        Indoor,
         //QuizScene,
         InfoScreen
     ],

@@ -3,6 +3,8 @@ import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin';
 import { taskBox } from './components/taskBox';
+import Bot from './components/Bot';
+import Player from './components/Player';
 
 export class Game extends Scene
 {
@@ -11,7 +13,7 @@ export class Game extends Scene
     gameText: Phaser.GameObjects.Text;
     //player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-    player: Phaser.Physics.Matter.Sprite;
+    player: Player;
     playerMovementSpeed: integer
     idleTimer: number;
     idleTimeLimit: number;
@@ -23,6 +25,8 @@ export class Game extends Scene
     inArea: boolean;
     allContainersChecked:boolean[];
     secondStage: boolean;
+    bot: Bot;
+    bot1: Bot;
 
     constructor ()
     {
@@ -31,6 +35,12 @@ export class Game extends Scene
 
     create ()
     {
+        //ControlsImage
+        const controlimage = this.add.image(1024/2,768-100,'controls')
+            .setDepth(100)
+            .setScale(0.5)
+            .setScrollFactor(0);
+        this.time.delayedCall(5000,() => controlimage.setVisible(false));
         //TaskBox
         this.scene.launch('InfoBoxScene');
         this.scene.bringToTop('InfoBoxScene');
@@ -39,8 +49,6 @@ export class Game extends Scene
         taskBox.addTask('Belausche die Mitarbeiter',false);
         this.time.delayedCall(500,()=>{taskBox.updateTasks();});
         //Parameters
-        this.playerMovementSpeed = 3;
-        this.idleTimeLimit = 2000;
         this.canPerformAction = false;
         this.interActionID = 0;
         this.interActionKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -52,13 +60,34 @@ export class Game extends Scene
         this.camera.setBackgroundColor(0x00ff00);
         //Submethods for loading the essentials
         this.loadTiles();
-        this.loadPlayer();
+        this.player = new Player(this, 51 * 32, 15 * 32, 'ts_player');
         this.loadUI();
         this.setColliders();
         //Camera follow setup
-        this.camera.startFollow(this.player,false,0.01,0.01);
+        this.camera.startFollow(this.player.getSprite(),false,0.01,0.01);
         this.cameras.main.setBounds(0, 0, 2016, 1408);
         this.cameras.main.roundPixels = true;
+        //Bot-Setup
+        this.bot = new Bot(this, 63*32, 1*32, ['ts_char_1','ts_char_2','ts_char_3'],'teleport');
+        this.bot.setPath([
+            { x: 63*32, y: 1*32 },
+            { x: 1*32, y: 1*32 },
+            { x: 1*32, y: 35*32 },
+            { x: 33*32, y: 35*32 },
+            { x: 33*32, y: 12*32 },
+            { x: 58*32, y: 12*32 },
+            { x: 58*32, y: 34*32 },
+            { x: 64*32, y: 34*32 },
+        ]);
+        this.bot1 = new Bot(this, 45*32, 14*32, ['ts_char_1','ts_char_2','ts_char_3'],'teleport');
+        this.bot1.setPath([
+            { x: 45*32, y: 14*32 },
+            { x: 45*32, y: 12*32 },
+            { x: 34*32, y: 12*32 },
+            { x: 34*32, y: 35*32 },
+            { x: 19*32, y: 35*32 },
+            { x: 19*32, y: 30*32 },
+        ]);
 
     }
 
@@ -67,7 +96,7 @@ export class Game extends Scene
         const garbageBin1Collider = this.matter.add.rectangle(12*32-30,22*32,32,64);
         garbageBin1Collider.isStatic = true;
         garbageBin1Collider.isSensor = true;
-        garbageBin1Collider.setOnCollideWith(this.player.body as MatterJS.BodyType,() => {
+        garbageBin1Collider.setOnCollideWith(this.player.getBody(),() => {
             this.canPerformAction = true;
             this.time.delayedCall(3000,this.showActionText.bind(this));
             this.interActionID = 1;
@@ -81,7 +110,7 @@ export class Game extends Scene
         const garbageBin2Collider = this.matter.add.rectangle(12*32-30,25*32,32,64);
         garbageBin2Collider.isStatic = true;
         garbageBin2Collider.isSensor = true;
-        garbageBin2Collider.setOnCollideWith(this.player.body as MatterJS.BodyType,() => {
+        garbageBin2Collider.setOnCollideWith(this.player.getBody(),() => {
             this.canPerformAction = true;
             this.time.delayedCall(3000,this.showActionText.bind(this));
             this.interActionID = 2;
@@ -95,7 +124,7 @@ export class Game extends Scene
         const garbageBin3Collider = this.matter.add.rectangle(12*32-30,28*32,32,64);
         garbageBin3Collider.isStatic = true;
         garbageBin3Collider.isSensor = true;
-        garbageBin3Collider.setOnCollideWith(this.player.body as MatterJS.BodyType,() => {
+        garbageBin3Collider.setOnCollideWith(this.player.getBody(),() => {
             this.canPerformAction = true;
             this.time.delayedCall(3000,this.showActionText.bind(this));
             this.interActionID = 3;
@@ -110,7 +139,7 @@ export class Game extends Scene
         const workerArea = this.matter.add.rectangle(30*32,34*32,400,200);
         workerArea.isStatic = true;
         workerArea.isSensor = true;
-        workerArea.setOnCollideWith(this.player.body as MatterJS.BodyType, () => {
+        workerArea.setOnCollideWith(this.player.getBody(), () => {
             this.inArea = true;
             this.time.delayedCall(3000,this.createConversation.bind(this))
         });
@@ -122,7 +151,7 @@ export class Game extends Scene
         const vanArea = this.matter.add.rectangle(53*32,17*32,(3+4)*32,(7+4)*32);
         vanArea.isStatic = true;
         vanArea.isSensor = true;
-        vanArea.setOnCollideWith(this.player.body as MatterJS.BodyType, () => {
+        vanArea.setOnCollideWith(this.player.getBody(), () => {
             this.canPerformAction = true;
             this.time.delayedCall(3000,this.showActionText.bind(this));
             this.interActionID = 4;
@@ -155,8 +184,10 @@ export class Game extends Scene
     }
 
     update(time:number, delta: number){
-        this.movement(delta);
         this.interact();
+        this.player.update(delta);
+        this.bot1.update();
+        this.bot.update();
     }
 
     interact(){
@@ -165,42 +196,48 @@ export class Game extends Scene
                 switch(this.interActionID){
                     case 1:{
                         //Garbage1
-                        const image = this.add.image(1024/2,768/2,'visitor_pass');
-                        image.setScrollFactor(0);
-                        image.setDepth(99);
-                        this.createCloseButton(image);
-                        this.allContainersChecked[0] = true;
-                        if(this.allContainersChecked.every(Boolean)){
-                            taskBox.completeTask(0);
-                            this.addTask();
-                        }
+                        if(!this.allContainersChecked[0]){
+                            const image = this.add.image(1024/2,768/2,'visitor_pass');
+                            image.setScrollFactor(0);
+                            image.setDepth(99);
+                            this.createCloseButton(image);
+                            this.allContainersChecked[0] = true;
+                            if(this.allContainersChecked.every(Boolean)){
+                                taskBox.completeTask(0);
+                                this.addTask();
+                            }
+                        }                        
                         break;
                     }
                     case 2:{
                         //Garbage2
-                        const image = this.add.image(1024/2,768/2,'nothingtofind');
-                        image.setScrollFactor(0);
-                        image.setDepth(99);
-                        this.createCloseButton(image);
-                        this.allContainersChecked[1] = true;
-                        if(this.allContainersChecked.every(Boolean)){
-                            taskBox.completeTask(0);
-                            this.addTask();
+                        if(!this.allContainersChecked[1]){
+                            const image = this.add.image(1024/2,768/2,'nothingtofind');
+                            image.setScrollFactor(0);
+                            image.setDepth(99);
+                            this.createCloseButton(image);
+                            this.allContainersChecked[1] = true;
+                            if(this.allContainersChecked.every(Boolean)){
+                                taskBox.completeTask(0);
+                                this.addTask();
+                            }
                         }
                         break;
                     }
                     case 3:{
                         //Garbage3
-                        const image = this.add.image(1024/2,768/2,'cv');
-                        image.setScrollFactor(0);
-                        image.setDepth(99);
-                        this.allContainersChecked[2] = true;
+                        if(!this.allContainersChecked[2]){
+                            const image = this.add.image(1024/2,768/2,'cv');
+                            image.setScrollFactor(0);
+                            image.setDepth(99);
+                            this.allContainersChecked[2] = true;
 
-                        this.createCloseButton(image);
-                        
-                        if(this.allContainersChecked.every(Boolean)){
-                            taskBox.completeTask(0);
-                            this.addTask();
+                            this.createCloseButton(image);
+                            
+                            if(this.allContainersChecked.every(Boolean)){
+                                taskBox.completeTask(0);
+                                this.addTask();
+                            }
                         }
                         break;
                     }
@@ -317,45 +354,6 @@ export class Game extends Scene
         this.matter.add.sprite(30*32,34*32,'worker2').setScale(2,2).setStatic(true);
     }
 
-    loadPlayer(){
-        this.player = this.matter.add.sprite(52*32,16*32,'ts_player');
-        this.player.setRectangle(30,20);
-        this.player.setOrigin(0.5,0.83);
-        this.player.setFixedRotation();
-        this.cursors = this.input.keyboard!.createCursorKeys();
-
-        this.anims.create({
-            key: 'left',
-            frames: this.anims.generateFrameNumbers('ts_player', { start: 117, end: 125 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'up',
-            frames: this.anims.generateFrameNumbers('ts_player', { start: 104, end: 112 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'right',
-            frames: this.anims.generateFrameNumbers('ts_player', { start: 143, end: 151 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'down',
-            frames: this.anims.generateFrameNumbers('ts_player', { start: 130, end: 138 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'idle',
-            frames: this.anims.generateFrameNumbers('ts_player', { start: 182, end: 183 }),
-            frameRate: 0.5,
-            repeat: -1
-        });
-    }
-
     loadUI(){
         //Infotext for Interaction
         this.infoText = this.add.text(1024/2, 768-50, 'Drücke die Leertaste zum Interagieren', { font: '24px Arial', color: '#fff' });
@@ -363,58 +361,6 @@ export class Game extends Scene
         this.infoText.setScrollFactor(0);
         this.infoText.setOrigin(0.5,0.5);
         this.infoText.setDepth(100);
-    }
-
-    movement(delta: any) {
-        let velocityX = 0;
-        let velocityY = 0;
-        let isMoving = false;
-    
-        // Überprüfung der Bewegung auf der X-Achse (links/rechts)
-        if (this.cursors.left.isDown) {
-            velocityX = -this.playerMovementSpeed;
-            this.player.anims.play('left', true);
-            isMoving = true;
-        } 
-        else if (this.cursors.right.isDown) {
-            velocityX = this.playerMovementSpeed;
-            this.player.anims.play('right', true);
-            isMoving = true;
-        }
-    
-        // Überprüfung der Bewegung auf der Y-Achse (oben/unten)
-        if (this.cursors.up.isDown) {
-            velocityY = -this.playerMovementSpeed;
-            this.player.anims.play('up', true);
-            isMoving = true;
-        } 
-        else if (this.cursors.down.isDown) {
-            velocityY = this.playerMovementSpeed;
-            this.player.anims.play('down', true);
-            isMoving = true;
-        }
-    
-        // Setze die finale Geschwindigkeit für X- und Y-Achse
-        this.player.setVelocity(velocityX, velocityY);
-    
-        // Bewegung überprüfen
-        if (isMoving) {
-            // Wenn der Spieler sich bewegt, setze den Idle-Timer zurück
-            this.idleTimer = 0;
-        } else {
-            // Wenn der Spieler sich nicht bewegt, erhöhe den Idle-Timer
-            this.idleTimer += delta;
-        }
-    
-        // Idle-Animation abspielen, wenn der Spieler eine Zeit lang still steht
-        if (!isMoving && this.idleTimer >= this.idleTimeLimit) {
-            this.player.anims.play('idle', true);
-        }
-    
-        // Stoppe die Animation, wenn keine Bewegung und Idle-Timer noch nicht erreicht ist
-        if (velocityX === 0 && velocityY === 0 && this.idleTimer < this.idleTimeLimit) {
-            this.player.anims.stop();
-        }
     }
 
     loadFont(name: string, url: any) {

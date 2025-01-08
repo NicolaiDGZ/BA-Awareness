@@ -26,6 +26,7 @@
     },
     "dependencies": {
         "phaser": "^3.80.1",
+        "phaser-animated-tiles": "^2.0.2",
         "phaser-matter-collision-plugin": "^1.0.0",
         "phaser3-rex-plugins": "^1.80.9",
         "vue": "^3.4.27"

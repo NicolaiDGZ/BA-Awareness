@@ -68,8 +68,7 @@ export class VisitorPass extends Scene {
             this.WINumber = "Fehler bei der Nummer\nHinweis: Schaue nochmal in den Besucherausweis, wie die Nummer aufgebaut ist.";
         }else{
             //Everything right!!
-            console.log('All right')
-            this.wrongInput("Alles richtig.");
+            this.scene.start("RecapScene");
         }
     }
 
