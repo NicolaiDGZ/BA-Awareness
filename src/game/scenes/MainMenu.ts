@@ -16,7 +16,8 @@ export class MainMenu extends Scene {
     }
 
     private createBackground() {
-        this.background = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
+        this.background = this.add.image(this.scale.width / 2, this.scale.height / 2, 'backgroundImage');
+        this.background.postFX.addVignette(0.5,0.5,0.8,0.5);
         this.background.setDisplaySize(this.scale.width, this.scale.height);
     }
 
@@ -29,7 +30,7 @@ export class MainMenu extends Scene {
             strokeThickness: 8,
             align: 'center'
         }).setOrigin(0.5);
-
+        this.title.postFX.addShadow();
         this.tweens.add({
             targets: this.title,
             scale: { from: 0.9, to: 1.1 },

@@ -58,6 +58,7 @@ export class Game extends Scene
         //Initial camera setup
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x00ff00);
+        this.camera.postFX.addVignette(0.5, 0.5, 0.8,0.4);
         //Submethods for loading the essentials
         this.loadTiles();
         this.player = new Player(this, 51 * 32, 15 * 32, 'ts_player');
