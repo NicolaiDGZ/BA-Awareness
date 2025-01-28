@@ -64,6 +64,9 @@ export class Preloader extends Scene
         this.load.image('ts_generic','ts_generic.png');
         this.load.image('ts_modernOffice','ts_modernOffice.png');
         this.load.image('ts_museum','ts_museum.png');
+        this.load.image('ts_jail','ts_jail.png');
+        this.load.image('ts_kitchen','ts_kitchen.png');
+
         this.load.spritesheet('ts_roomBuilder','ts_roomBuilder.png', { frameWidth: 32, frameHeight: 32});
         this.load.image('ts_roomBuilderOffice','ts_roomBuilderOffice.png');
         this.load.spritesheet('ts_a_turnstile','ts_a_turnstile.png', { frameWidth: 64, frameHeight: 96});
@@ -71,6 +74,9 @@ export class Preloader extends Scene
         this.load.spritesheet('ts_char_1','ts_char_1.png', { frameWidth: 32, frameHeight: 64});
         this.load.spritesheet('ts_char_2','ts_char_2.png', { frameWidth: 32, frameHeight: 64});
         this.load.spritesheet('ts_char_3','ts_char_3.png', { frameWidth: 32, frameHeight: 64});
+        this.load.spritesheet('ts_a_seccamera','ts_a_seccamera.png', { frameWidth: 32, frameHeight: 32});
+        this.load.image('ts_seccam_cone','ts_seccam_cone.png');
+        this.load.image('ts_highlight','ts_highlight.png');
 
 
 

@@ -20,6 +20,7 @@ export class Player {
         this.sprite.setRectangle(30, 20);
         this.sprite.setOrigin(0.5, 0.83);
         this.sprite.setFixedRotation();
+        this.sprite.setDepth(2);
         
         // Keyboard input
         this.cursors = scene.input.keyboard!.createCursorKeys();

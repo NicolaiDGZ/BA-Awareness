@@ -46,7 +46,7 @@ class Bot {
         // Add the bot sprite with Matter.js physics
         this.sprite = scene.matter.add.sprite(x, y, this.currentTexture, 0, {
             isStatic: false,
-            collisionFilter: { category: 0, mask: 0 } // No collision
+            collisionFilter: { category: 0x0011, mask: 0x0010 } // No collision
         });
 
         this.sprite.setFixedRotation(); // Prevent sprite rotation
@@ -165,6 +165,10 @@ class Bot {
         this.currentTexture = Phaser.Utils.Array.GetRandom(this.textures);
         this.sprite.setTexture(this.currentTexture);
         this.setupAnimations();
+    }
+
+    public getBody():MatterJS.BodyType{
+        return this.sprite.body as MatterJS.BodyType;
     }
 }
 
