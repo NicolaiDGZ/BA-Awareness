@@ -2,152 +2,203 @@ import { Scene } from "phaser";
 
 
 export class VisitorPass extends Scene {
-    WINumber: string;
-    WIName: string;
-    WIFirstname: string;
-    WIMail: string;
-    WIValid: string;
+    WINumber: string = 'Nummer falsch.';
+    WIName: string = 'Nachname falsch';
+    WIFirstname: string = 'Vorname falsch';
+    WIMail: string = 'Mail falsch';
+    WIValid: string = 'Datum falsch';
+    inputFields: any[] = [];
     constructor() {
         super({ key: 'VisitorPass' });
     }
     
     create() {
-        //Helptext
-        this.WINumber = "Fehler bei der Nummer";
-        this.WIName = "Fehler bei dem Nachnamen";
-        this.WIFirstname = "Fehler bei dem Vornamen";
-        this.WIValid = "Fehler bei dem Gültigkeitsdatum";
-        this.WIMail = "Fehler bei der Mail";
+        // Set terminal-style background
+        this.cameras.main.setBackgroundColor('#001100');
 
-        this.add.image(0,0,'desk').setOrigin(0,0).setDepth(0);
-        const config = {
-            type: 'text',                // Typ des Eingabefelds
-            placeholder: '[Hier tippen]',       // Standardtext
-            fontSize: '20px',            // Schriftgröße
-            color: '#000000',            // Textfarbe
-            backgroundColor: '#FFFFFF7F',  // Hintergrundfarbe
-            align: 'left',             // Textausrichtung
-            borderRadius: '5px',        // Abgerundete Ecken
-            fontFamily: 'Segoe Script',
+        // Title
+        this.add.text(512, 30, '> ÜBERGANGSSCHEIN FÄLSCHEN', {
+            fontFamily: 'Courier New',
+            fontSize: '38px',
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+
+        // Keynotes
+        this.add.text(100, 60, 
+            '> Notizen:\n' +
+            '- gefundene Dokumente:  x Besucherausweis     x Bewerbungsunterlagen\n' +
+            '- aus dem Gespräch\n  - Mitarbeiter fängt Montag (16.11.2033) an\n  - Aussehen ist Kollegen unbekannt\n' +
+            '- weiteres Vorgehen\n  - Übergangskarte fälschen\n  - sich am Montag als neuer Mitarbeiter ausgeben\n' + 
+            '----------------------------------------------------------------------',
+            {
+                fontFamily: 'Courier New',
+                fontSize: '20px',
+                color: '#00ff00',
+                stroke: '#003300',
+                strokeThickness: 1,
+                lineSpacing: 10
+            }
+        );
+
+        // Document Options
+        const options = ['Visum anzeigen', 'Lebenslauf anzeigen'];
+        let yPos = 320;
+        
+        options.forEach((option, index) => {
+            const optionText = this.add.text(100, yPos, `[ ] ${option}`, {
+                fontFamily: 'Courier New',
+                fontSize: '24px',
+                color: '#00ff00',
+                stroke: '#003300',
+                strokeThickness: 1,
+            })
+            .setInteractive()
+            .on('pointerover', () => optionText.setText(`[>] ${option}`))
+            .on('pointerout', () => optionText.setText(`[ ] ${option}`))
+            .on('pointerdown', () => this.loadImage(index === 0 ? 'visitor_pass' : 'cv'));
+
+            yPos += 50;
+        });
+
+        this.add.text(100, 410, 
+            '----------------------------------------------------------------------',
+            {
+                fontFamily: 'Courier New',
+                fontSize: '20px',
+                color: '#00ff00',
+                stroke: '#003300',
+                strokeThickness: 1,
+                lineSpacing: 10
+            }
+        );
+
+        // Input Fields
+        const inputConfig = {
+            type: 'text',
+            placeholder: 'eingabe...',
+            fontSize: '20px',
+            color: '#00ff00',
+            backgroundColor: '#001100',
+            borderColor: '#00ff00',
+            borderWidth: 2,
+            fontFamily: 'Courier New',
+            padding: { left: 10, right: 10 }
         };
-        const number = this.add.rexInputText(800, 110, 150, 30, config).setOrigin(0,0);
-        const name = this.add.rexInputText(800,110 + 1 * 38,150,30,config).setOrigin(0,0);
-        const firstname = this.add.rexInputText(800,110 + 2 * 38,150,30,config).setOrigin(0,0);
-        const mail = this.add.rexInputText(800,110 + 3 * 38,150,30,config).setOrigin(0,0);
-        const valid = this.add.rexInputText(800,110 + 4 * 38,150,30,config).setOrigin(0,0);
 
-        const vpbutton = this.add.rectangle(500,325,500,100).setOrigin(0,0).setInteractive({ useHandCursor: true });
-        const cvbutton = this.add.rectangle(500,442,500,100).setOrigin(0,0).setInteractive({ useHandCursor: true });
-        const confirmbutton = this.add.rectangle(500,630,500,100).setOrigin(0,0).setInteractive({ useHandCursor: true });
+        const labels = ['Nummer:', 'Nachname:', 'Vorname:', 'E-Mail:', 'Gültig bis:'];
+        yPos = 460;
+        
+        labels.forEach((label, index) => {
+            this.add.text(100, yPos - 9, label, {
+                fontFamily: 'Courier New',
+                fontSize: '20px',
+                color: '#00ff00'
+            });
 
-        vpbutton.on('pointerdown',() => this.loadImage('visitor_pass'));
-        cvbutton.on('pointerdown',() => this.loadImage('cv'));
-        confirmbutton.on('pointerdown',() => this.confirm(number.text,name.text,firstname.text,mail.text,valid.text));
+            const field = this.add.rexInputText(250, yPos, 300, 40, inputConfig)
+                .setOrigin(0, 0.5)
+                .setText('');
+            this.inputFields.push(field);
+            
+            yPos += 50;
+        });
+
+        // Verify Button
+        const verifyButton = this.add.text(512, 720, '> ÜBERPRÜFEN', {
+            fontFamily: 'Courier New',
+            fontSize: '28px',
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2
+        })
+        .setOrigin(0.5)
+        .setInteractive()
+        .on('pointerover', () => verifyButton.setColor('#00ffff'))
+        .on('pointerout', () => verifyButton.setColor('#00ff00'))
+        .on('pointerdown', () => this.confirm());
     }
 
-    confirm(number:string,name:string,firstname:string,mail:string,valid:string){
-        if(name != 'Federer'){
+    confirm(){
+        if(this.inputFields[1].text != 'Federer'){
             //name wrong
             this.wrongInput(this.WIName);
-            this.WIName = "Fehler bei dem Nachnamen\nHinweis: Schaue nochmal in die Notizen, als welche Person du dich ausgeben möchtest.";
-        }else if(firstname != 'Jonas'){
+            this.WIName = "Fehler bei dem Nachnamen\nHinweis: Schaue nochmal in die Notizen,\n als welche Person du dich ausgeben möchtest.";
+        }else if(this.inputFields[2].text != 'Jonas'){
             //firstname wrong
             this.wrongInput(this.WIFirstname);
-            this.WIFirstname = "Fehler bei dem Vornamen\nHinweis: Schaue nochmal in die Notizen, als welche Person du dich ausgeben möchtest.";
-        }else if(mail != 'jonas.federer@pdg.de'){
+            this.WIFirstname = "Fehler bei dem Vornamen\nHinweis: Schaue nochmal in die Notizen,\n als welche Person du dich ausgeben möchtest.";
+        }else if(this.inputFields[3].text != 'jonas.federer@pdg.de'){
             //mail wrong
             this.wrongInput(this.WIMail);
             this.WIMail = "Fehler bei der Mail\nHinweis: Schaue nochmal, ob du die Email-Adresse schon irgendwo gefunden hast.";
-        }else if(valid != '16.11.2033'){
+        }else if(this.inputFields[4].text != '16.11.2033'){
             //valid wrong
             this.wrongInput(this.WIValid);
-            this.WIValid = "Fehler bei dem Datum\nHinweis: Schaue nochmal in den Notizen, wann der Mitarbeiter erwartet wird.";
-        }else if(number != 'JF-331116' ){
+            this.WIValid = "Fehler bei dem Datum\nHinweis: Schaue nochmal in den Notizen,\n wann der Mitarbeiter erwartet wird.";
+        }else if(this.inputFields[0].text != 'JF-331116' ){
             //number wrong
             this.wrongInput(this.WINumber);
-            this.WINumber = "Fehler bei der Nummer\nHinweis: Schaue nochmal in den Besucherausweis, wie die Nummer aufgebaut ist.";
+            this.WINumber = "Fehler bei der Nummer\nHinweis: Schaue nochmal in den Besucherausweis,\n wie die Nummer aufgebaut ist.";
         }else{
             //Everything right!!
             this.scene.start("RecapScene");
         }
     }
 
-    loadImage(key: string){
-        // Hintergrund erstellen
-        const background = this.add.rectangle(0, 0, 1024, 768, 0x0, 0.3).setOrigin(0, 0);
-        
-        // Bild in der Mitte anzeigen
-        const image = this.add.image(1024 / 2, 768 / 2, key);
-    
-        // Button-Koordinaten berechnen (unterhalb des Bildes)
-        const buttonx = image.x - 80; // Zentriere den Button horizontal, daher -50
-        const buttony = image.y + image.height / 2 + 50; // 50px unter dem Bild
-    
-        // Graphics-Objekt für den Button erstellen
-        const closeButton = this.add.graphics()
-            .fillStyle(0xFF5252, 1)
-            .fillRoundedRect(buttonx, buttony, 160, 50, 15)
-            .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(buttonx, buttony, 160, 50, 15);
-    
-        // Button-Text hinzufügen und zentrieren
-        const buttonText = this.add.text(buttonx + 80, buttony + 25, 'Schließen', {
+    private loadImage(key: string) {
+        this.inputFields.forEach(field => field.setVisible(false));
+        // Dark overlay
+        const overlay = this.add.rectangle(0, 0, 1024, 768, 0x000000, 0.8)
+            .setOrigin(0, 0)
+            .setInteractive();
+
+        // Image display
+        const image = this.add.image(512, 384, key)
+            .setDepth(1);
+
+        // Close button
+        const closeButton = this.add.text(512, 650, '> SCHLIEßEN', {
+            fontFamily: 'Courier New',
             fontSize: '24px',
-            color: '#000000',
-            fontFamily: 'Arial',
-            align: 'center'
-        }).setOrigin(0.5, 0.5);
-    
-        // Add fake rectangele
-        const buttonContainer = this.add.rectangle(buttonx,buttony,160,50).setOrigin(0,0).setInteractive({ useHandCursor: true });
-        // Button Klick-Event
-        buttonContainer.on('pointerdown', () => {
-            console.log("Close Button Clicked")
-            image.setVisible(false);
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2
+        })
+        .setOrigin(0.5)
+        .setInteractive()
+        .on('pointerover', () => closeButton.setColor('#00ffff'))
+        .on('pointerout', () => closeButton.setColor('#00ff00'))
+        .on('pointerdown', () => {
+            overlay.destroy();
             image.destroy();
-            background.setVisible(false);
-            background.destroy()
-            buttonContainer.setVisible(false);
-            buttonText.setVisible(false);
-            closeButton.setVisible(false);
             closeButton.destroy();
-            buttonContainer.destroy();
-            buttonText.destroy();
+            this.inputFields.forEach(field => field.setVisible(true));
         });
     }
 
-    wrongInput(input: string){
-        // Hintergrund erstellen
-        const background = this.add.rectangle(0, 0, 1024, 768, 0x0, 0.3).setOrigin(0, 0);
-        const middlex = 1024/2;
-        const middley = 768/2;
+    private wrongInput(message: string) {
+        this.inputFields.forEach(field => field.setVisible(false));
+        const overlay = this.add.rectangle(0, 0, 1024, 768, 0x000000, 0.7)
+            .setOrigin(0, 0);
 
-        const infotext = this.add.text(middlex, middley, input, {
+        const errorBox = this.add.text(512, 384, `> FEHLER:\n${message == null? '': message}`, {
+            fontFamily: 'Courier New',
             fontSize: '24px',
-            color: '#000000',
-            fontFamily: 'Arial',
-            align: 'center'
-        }).setOrigin(0.5, 0.5).setDepth(2);
+            color: '#ff5555',
+            stroke: '#330000',
+            strokeThickness: 2,
+            align: 'center',
+            lineSpacing: 15
+        })
+        .setOrigin(0.5)
+        .setDepth(1);
 
-        // Graphics-Objekt für den Button erstellen
-        const rectangle = this.add.graphics()
-            .fillStyle(0xFF5252, 1)
-            .fillRoundedRect(middlex - infotext.width / 2 - 25, middley - infotext.height / 2 - 25, infotext.width + 50, infotext.height + 50, 15)
-            .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(middlex - infotext.width /2 - 25, middley - infotext.height / 2 - 25, infotext.width + 50, infotext.height + 50, 15);
-    
-        // Button-Text hinzufügen und zentrieren
-        
-    
-        // Button Klick-Event
         this.time.delayedCall(3000, () => {
-            console.log("Close Button Clicked")
-            background.setVisible(false);
-            background.destroy()
-            infotext.setVisible(false);
-            rectangle.setVisible(false);
-            rectangle.destroy();
-            infotext.destroy();
+            overlay.destroy();
+            errorBox.destroy();
+            this.inputFields.forEach(field => field.setVisible(true));
         });
     }
 }

@@ -126,30 +126,135 @@ export class Indoor extends Scene
 
     interact(){
         if(this.canPerformAction){
+            const highlight = this.highlightObjects[this.interActionID - 1];
             if(Phaser.Input.Keyboard.JustDown(this.interActionKey)){
                 switch(this.interActionID){
                     case 1:{        
-                             console.log(this.interActionID);
+                        //Small desk server
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "serverName", 
+                                imageScale: 1, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
                         break;
                     }
                     case 2:{
-                        console.log(this.interActionID);
+                        //Big  desk server
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "serverNote", 
+                                imageScale: 1, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
                         break;
                     }
                     case 3:{
-                        console.log(this.interActionID);
+                        //Chef Books
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "sudoku", 
+                                imageScale: 0.5, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.bringToTop("PopupScene");
+                            this.scene.pause();
+                        }
                         break;
                     }
                     case 4:{
-                        console.log(this.interActionID);
+                        //Chef Bookshelf
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "architecture", 
+                                imageScale: 0.5, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
+                        break;
+                    }
+                    case 5:{
+                        //Chef Certificate
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "photoCertificate", 
+                                imageScale: 0.22, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
+                        break;
+                    }
+                    case 6:{
+                        //Chef Screen
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "cameraShop", 
+                                imageScale: 0.8, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
+                        break;
+                    }
+                    case 7:{
+                        //office bottom left
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "organigramm", 
+                                imageScale: 0.8, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
+                        break;
+                    }
+                    case 8:{
+                        //office bottom right
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "crossword", 
+                                imageScale: 0.75, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
+                        break;
+                    }
+                    case 9:{
+                        //office top
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "summerparty", 
+                                imageScale: 0.3, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
+                        break;
+                    }
+                    case 10:{
+                        //Front desk list
+                        if(highlight){
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "visitorlist", 
+                                imageScale: 0.8, 
+                                returnScene: "Indoor" 
+                            });
+                            this.scene.pause();
+                        }
                         break;
                     }
                     default:{
-                        console.log("No valid interActionID");
+                        console.log(this.interActionID);
                         break;
                     }
                 }
-                const highlight = this.highlightObjects[this.interActionID - 1];
                 if (highlight) {
                     // Destroy the highlight object
                     highlight.setVisible(false); 
@@ -163,50 +268,66 @@ export class Indoor extends Scene
         }
     }
 
-    createCloseButton(image: Phaser.GameObjects.Image){
+    openResource(key : string){
+        const image = this.add.image(1024/2,768/2,key);
+        image.setScrollFactor(0);
+        image.setDepth(99);
+        image.setScale(1 / this.camera.zoom)
+        this.createCloseButton(image);
+        this.allContainersChecked[1] = true;
+        if(this.allContainersChecked.every(Boolean)){
+            taskBox.completeTask(0);
+            this.addTask();
+        }
+    }
+
+    createCloseButton(image: Phaser.GameObjects.Image) {
         // Button-Koordinaten berechnen (unterhalb des Bildes)
-        const buttonx = image.x - 80; // Zentriere den Button horizontal, daher -50
-        const buttony = image.y + image.height / 2 + 50; // 50px unter dem Bild
+        const buttonx = image.x - 80;
+        const buttony = image.y + image.height / 2 + 50;
+    
+        // Container erstellen
+        const container = this.add.container(buttonx, buttony)
+            .setScrollFactor(0)
+            .setDepth(100)
+            .setScale(1/3);
     
         // Graphics-Objekt für den Button erstellen
         const closeButton = this.add.graphics()
             .fillStyle(0xFF5252, 1)
-            .fillRoundedRect(buttonx, buttony, 160, 50, 15)
+            .fillRoundedRect(0, 0, 160, 50, 15)
             .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(buttonx, buttony, 160, 50, 15)
-            .setScrollFactor(0)
-            .setDepth(100);
+            .strokeRoundedRect(0, 0, 160, 50, 15)
+            .setScrollFactor(0);
+        container.add(closeButton);
     
         // Button-Text hinzufügen und zentrieren
-        const buttonText = this.add.text(buttonx + 80, buttony + 25, 'Schließen', {
+        const buttonText = this.add.text(80, 25, 'Schließen', {
             fontSize: '24px',
             color: '#000000',
             fontFamily: 'Arial',
             align: 'center'
         })
             .setOrigin(0.5, 0.5)
-            .setScrollFactor(0)
-            .setDepth(100);
+            .setScrollFactor(0);
+        container.add(buttonText);
     
-        // Add fake rectangele
-        const buttonContainer = this.add.rectangle(buttonx,buttony,160,50)
-            .setOrigin(0,0)
+        // Interaktiven Bereich erstellen
+        const buttonContainer = this.add.rectangle(0, 0, 160, 50)
+            .setOrigin(0, 0)
             .setInteractive({ useHandCursor: true })
-            .setScrollFactor(0)
-            .setDepth(100);
+            .setScrollFactor(0);
+        container.add(buttonContainer);
+    
         // Button Klick-Event
         buttonContainer.on('pointerdown', () => {
-            console.log("Close Button Clicked")
-            image.setVisible(false);
+            console.log("Close Button Clicked");
             image.destroy();
-            buttonContainer.setVisible(false);
-            buttonText.setVisible(false);
-            closeButton.setVisible(false);
-            closeButton.destroy();
-            buttonContainer.destroy();
-            buttonText.destroy();
+            container.destroy();
         });
     }
+    
+
     addTask() {
         if(taskBox.tasks.every(task => task.completed == true)){
             this.secondStage = true;
@@ -284,7 +405,7 @@ export class Indoor extends Scene
             { x: 10, y: 12 },
             { x: 4, y: 12 },
             { x: 7, y: 10 },
-            { x: 5, y: 17 },
+            { x: 4.9, y: 17.3 },
         ]
 
         this.highlightObjects = [];

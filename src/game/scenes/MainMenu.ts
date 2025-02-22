@@ -17,7 +17,7 @@ export class MainMenu extends Scene {
 
     private createBackground() {
         this.background = this.add.image(this.scale.width / 2, this.scale.height / 2, 'backgroundImage');
-        this.background.postFX.addVignette(0.5,0.5,0.8,0.5);
+        this.background.postFX.addVignette(0.5,0.5,0.8,0.45);
         this.background.setDisplaySize(this.scale.width, this.scale.height);
     }
 
@@ -42,10 +42,11 @@ export class MainMenu extends Scene {
 
     private createButtons() {
         const buttonData = [
-            { text: 'Play', scene: 'InfoScreen' },
-            { text: 'Controls', scene: 'RecapScene' },
-            { text: 'Credits', scene: 'VisitorPass' },
-            { text: 'IndoorTest', scene: 'Indoor' }
+            { text: 'Spielen', scene: 'InfoScreen' },
+            { text: 'Steuerung', scene: 'VisitorPass' },
+            { text: 'Credits', scene: 'Credits' },
+            { text: 'DevTest', scene: 'Indoor' },
+            { text: 'DevTestQuiz', scene: 'QuizScene' }
         ];
 
         this.buttons = buttonData.map((data, index) => {
@@ -63,18 +64,18 @@ export class MainMenu extends Scene {
             button.on('pointerdown', () => {
                 console.log(`${data.text} button clicked`);
                 // Only start the Game scene for now
-                if (data.scene === 'RecapScene') {
-                    this.scene.start(data.scene);
-                    console.log(data.scene);
+                if (data.scene === 'Credits') {
+                    this.scene.start('InfoScreen', {
+                        title: 'Credits',
+                        message: 'Spielkonzept, Programmierung & co:\n\nNicolai Diehl\nnicolai.diehl@tuta.io\n\n\n\nAssets:\n\nLimeZu\nhttps://limezu.itch.io/',
+                        scene: 'MainMenu'});
                 }else if(data.scene === 'InfoScreen'){
                     this.scene.start(data.scene, {
                         title: 'Informationen sammeln',
                         //message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',
                         message: 'Als geschickter Social Engineer hast du ein klares Ziel: das Unternehmen G-Neric Corp zu infiltrieren. \nDoch der Zugang zum Firmengebäude ist nicht jedem gewährt – doch du bist bereit, jedes Schlupfloch zu finden. \nMit deinem Bus fährst du zum Gebäude, entschlossen, entscheidende Informationen aufzuspüren, die dir den Weg ins Innere ebnen. \n Viel Erfolg!',
                         scene: 'Game'});
-                }else if( data.scene === 'VisitorPass'){
-                    this.scene.start(data.scene);
-                }else if( data.scene === 'Indoor'){
+                }else{
                     this.scene.start(data.scene);
                 }
             });

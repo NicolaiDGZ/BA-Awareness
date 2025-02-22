@@ -34,7 +34,7 @@ export class Preloader extends Scene
 
         this.load.image('cv', 'cv.png');
         this.load.image('visitor_pass', 'visitor_pass.png');
-
+        this.load.image('closeButton', 'closeButton.png');
         this.load.image('worker1', 'worker1.png');
         this.load.image('worker2', 'worker2.png');
         this.load.image('desk', 'desk.png');
@@ -77,8 +77,18 @@ export class Preloader extends Scene
         this.load.spritesheet('ts_a_seccamera','ts_a_seccamera.png', { frameWidth: 32, frameHeight: 32});
         this.load.image('ts_seccam_cone','ts_seccam_cone.png');
         this.load.image('ts_highlight','ts_highlight.png');
-
-
+        //Indoorfindings
+        this.load.setPath('assets/indoorFindings');
+        this.load.image('visitorlist','visitorlist.png');
+        this.load.image('serverName','serverName.png');
+        this.load.image('serverNote','serverNote.png');
+        this.load.image('sudoku','sudoku.png');
+        this.load.image('architecture','architecture.png');
+        this.load.image('photoCertificate','photoCertificate.png');
+        this.load.image('cameraShop','cameraShop.png');
+        this.load.image('organigramm','organigramm.png');
+        this.load.image('crossword','crossword.png');
+        this.load.image('summerparty','summerparty.png');
 
         // TileMaps
         this.load.setPath('assets/tileMaps');

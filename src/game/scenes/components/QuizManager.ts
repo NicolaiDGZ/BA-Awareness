@@ -1,10 +1,30 @@
 class QuizManager {
-    private questions: { question: string, options: string[], correctAnswers: number[] }[] = [];
-    private userAnswers: boolean[][] = []; // Array von Antworten für jede Frage
+    private defaultCorrectHint = "Richtig! Gut gemacht!";
+    private questions: {
+        question: string,
+        options: string[],
+        correctAnswers: number[],
+        infoTextWrong: string,
+        infoTextCorrect: string
+    }[] = [];
+    
+    private userAnswers: boolean[][] = [];
 
-    addQuestion(question: string, options: string[], correctAnswerIndex: number | number[]) {
-        this.questions.push({ question, options, correctAnswers: Array.isArray(correctAnswerIndex) ? correctAnswerIndex : [correctAnswerIndex] });
-        this.userAnswers.push(Array(options.length).fill(false)); // Initialisiert die Antworten für die neue Frage
+    addQuestion(
+        question: string,
+        options: string[],
+        correctAnswerIndex: number | number[],
+        infoTextWrong: string,
+        infoTextCorrect: string = this.defaultCorrectHint
+    ) {
+        this.questions.push({
+            question,
+            options,
+            correctAnswers: Array.isArray(correctAnswerIndex) ? correctAnswerIndex : [correctAnswerIndex],
+            infoTextWrong,
+            infoTextCorrect
+        });
+        this.userAnswers.push(Array(options.length).fill(false));
     }
 
     getQuestion(index: number): string {
@@ -40,6 +60,21 @@ class QuizManager {
     getTotalQuestions(): number {
         return this.questions.length;
     }
+
+    reset() {
+        this.questions = [];
+        this.userAnswers = [];
+    }
+
+    getInfoText(index: number, isCorrect: boolean): string {
+        const question = this.questions[index];
+        return isCorrect ? question.infoTextCorrect : question.infoTextWrong;
+    }
+
+    setDefaultCorrectHint(hint: string) {
+        this.defaultCorrectHint = hint;
+    }
+
 }
 
   

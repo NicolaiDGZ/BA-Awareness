@@ -2,179 +2,284 @@ import { Scene } from 'phaser';
 import { quizManager } from './components/QuizManager';
 
 export class QuizScene extends Scene {
-    camera: Phaser.Cameras.Scene2D.Camera;
-    questionText: Phaser.GameObjects.Text;
-    instructionText: Phaser.GameObjects.Text;
-    options: { text: Phaser.GameObjects.Text; checkbox: Phaser.GameObjects.Image }[] = [];
-    currentQuestionIndex: number = 0;
-    selectedAnswers: boolean[] = [];
-    confirmButton: Phaser.GameObjects.Text;
+    private currentQuestionIndex: number = 0;
+    private selectedAnswers: boolean[] = [];
+    private questionText!: Phaser.GameObjects.Text;
+    private optionElements: Phaser.GameObjects.Text[] = [];
+    private submitButton!: Phaser.GameObjects.Text;
+    private infoText!: Phaser.GameObjects.Text;
+    private continueButton!: Phaser.GameObjects.Text;
+    //Keys
+    private key1!: Phaser.Input.Keyboard.Key;
+    private key2!: Phaser.Input.Keyboard.Key;
+    private key3!: Phaser.Input.Keyboard.Key;
+    private key4!: Phaser.Input.Keyboard.Key;
+    private enterKey!: Phaser.Input.Keyboard.Key;
+    continueText: import("phaser").GameObjects.Text;
 
     constructor() {
-        super('QuizScene');
+        super({ key: 'QuizScene' });
     }
 
-    init() {
+    create() {
+        this.cameras.main.setBackgroundColor('#001100');
+        this.addQuestions();
+        this.currentQuestionIndex = 0;
+        this.setupQuestion();
+        this.setupKeyboardControls();
+    }
+
+    private addQuestions() {
         // Beispiel-Fragen für das Quiz
         quizManager.addQuestion("Was ist Social Engineering?", [
             "Versuch, Computer zu hacken",
             "Manipulation von Menschen",
             "Methode, Sicherheitskameras zu umgehen",
             "Entwicklung von sozialen Medien"
-        ], 1);
+        ], 1, "Ein Social Engineer ist ein Manipulator");
         quizManager.addQuestion("Welches Verhalten sollte vermieden werden?", [
             "Dokumente wegwerfen",
-            "Passwörter behalten",
+            "Passwörter aufschreiben",
             "Gespräche in Öffentlichkeit vermeiden",
             "Sicherheitsrichtlinien missachten"
-        ], 0);
+        ], [0,1], "Dokumente wegwerfen ist nichts schlimmes. Passwörter aufschreiben - böööse!");
     }
 
-    create() {
-        console.log("QuizScene created.");
-        // Hintergrund und Kamera
-        this.camera = this.cameras.main;
-        this.add.rectangle(0, 0, 1024, 768, 0x369ea6, 1).setOrigin(0, 0);
+    private setupKeyboardControls() {
+        // Initialize number keys
+        this.key1 = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+        this.key2 = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+        this.key3 = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+        this.key4 = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+        this.enterKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
-        // Fragen-Text (oberer Bereich)
-        this.questionText = this.add.text(512, 100, '', {
-            fontFamily: 'Arial Black', fontSize: 32, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 3,
-            align: 'center', wordWrap: { width: 800, useAdvancedWrap: true }
-        }).setOrigin(0.5).setDepth(100);
-
-        // Frage-Box
-        const questionRectangle = this.add.graphics()
-            .fillStyle(0xe9ddaf, 1)
-            .fillRoundedRect(112, 180, 800, 300, 15)
-            .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(112, 180, 800, 300, 15);
-
-        // Anweisungs-Text (unten)
-        this.instructionText = this.add.text(512, 700, 'Wähle eine oder mehrere Antworten und bestätige', { font: '24px Arial', color: '#fff' })
-            .setDepth(100).setOrigin(0.5);
-
-        // Animation für Anweisungs-Text
-        this.tweens.add({
-            targets: this.instructionText,
-            scale: { from: 0.95, to: 1.05 },
-            duration: 1500,
-            yoyo: true,
-            repeat: -1
-        });
-
-        // Bestätigen-Button
-        this.confirmButton = this.add.text(512, 600, 'Bestätigen', {
-            fontFamily: 'Arial Black', fontSize: 28, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 3,
-            align: 'center'
-        })
-            .setOrigin(0.5)
-            .setInteractive()
-            .on('pointerdown', () => this.handleConfirm())
-            .setDepth(100);
-
-        // Styling für den Bestätigen-Button
-        const confirmButtonRectangle = this.add.graphics()
-            .fillStyle(0x4CAF50, 1) // Grüner Farbton
-            .fillRoundedRect(this.confirmButton.x - this.confirmButton.width / 2 - 15, this.confirmButton.y - this.confirmButton.height / 2 - 10, this.confirmButton.width + 30, this.confirmButton.height + 20, 10)
-            .lineStyle(3, 0x0, 1)
-            .strokeRoundedRect(this.confirmButton.x - this.confirmButton.width / 2 - 15, this.confirmButton.y - this.confirmButton.height / 2 - 10, this.confirmButton.width + 30, this.confirmButton.height + 20, 10);
-
-        // Zeigt die erste Frage an
-        this.displayQuestion();
+        // Add event listeners
+        this.key1.on('down', () => this.handleKeyPress(0));
+        this.key2.on('down', () => this.handleKeyPress(1));
+        this.key3.on('down', () => this.handleKeyPress(2));
+        this.key4.on('down', () => this.handleKeyPress(3));
+        this.enterKey.on('down', () => this.handleEnter());
     }
 
-    // Zeigt die aktuelle Frage und ihre Antwortmöglichkeiten an
-    private displayQuestion() {
-        const question = quizManager.getQuestion(this.currentQuestionIndex);
-        const options = quizManager.getOptions(this.currentQuestionIndex);
-
-        this.questionText.setText(question);
-
-        // Löscht alte Optionen
-        this.options.forEach(option => {
-            option.text.destroy();
-            option.checkbox.destroy();
-        });
-        this.options = [];
-        this.selectedAnswers = Array(options.length).fill(false);
-
-        options.forEach((optionText, index) => {
-            const contentY = 220 + index * 50;
-
-            // Checkbox
-            const checkbox = this.add.image(170, contentY, this.selectedAnswers[index] ? 'cb_true' : 'cb_false')
-                .setInteractive()
-                .on('pointerdown', () => this.toggleAnswer(index));
-
-            // Antworttext
-            const answerText = this.add.text(250, contentY, optionText, {
-                fontFamily: 'Arial Black', fontSize: 28, color: '#ffffff',
-                stroke: '#000000', strokeThickness: 3,
-                align: 'left'
-            }).setOrigin(0, 0.5)
-              .setInteractive() // Interaktiv machen
-              .on('pointerdown', () => this.toggleAnswer(index)); // Toggle bei Klick
-
-            // Antwortbox für visuelle Konsistenz
-            const answerRectangle = this.add.graphics()
-                .fillStyle(0xe9ddaf, 1)
-                .fillRoundedRect(150, contentY - 20, 650, 40, 10)
-                .lineStyle(3, 0x0, 1)
-                .strokeRoundedRect(150, contentY - 20, 650, 40, 10);
-
-            // Speichert Checkbox und Text in der Optionsliste
-            this.options.push({ text: answerText, checkbox: checkbox });
-        });
-    }
-
-    private toggleAnswer(index: number) {
-        this.selectedAnswers[index] = !this.selectedAnswers[index];
-        const checkbox = this.options[index].checkbox;
-        checkbox.setTexture(this.selectedAnswers[index] ? 'cb_true' : 'cb_false');
-    }
-
-    private handleConfirm() {
-        quizManager.answerMultipleChoiceQuestion(this.currentQuestionIndex, this.selectedAnswers);
-        const isCorrect = quizManager.isAnswerCorrect(this.currentQuestionIndex);
-        console.log(isCorrect ? "Richtige Antwort!" : "Falsche Antwort!");
-
-        if (this.currentQuestionIndex < quizManager.getTotalQuestions() - 1) {
-            this.currentQuestionIndex++;
-            this.displayQuestion();
-        } else {
-            this.showResults();
+    private handleKeyPress(index: number) {
+        // Only allow selection if options are available
+        if (index < this.optionElements.length) {
+            this.toggleOption(index);
         }
     }
 
-    private showResults() {
-        this.questionText.setText('');
-        this.options.forEach(option => {
-            option.text.destroy();
-            option.checkbox.destroy();
-        });
-        this.options = [];
+    private handleEnter() {
+        // Submit answer if in question phase
+        if (this.submitButton?.active) {
+            this.handleAnswerSubmission();
+        }
+        // Continue to next question if in feedback phase
+        else if (this.continueButton?.active) {
+            this.proceedToNext();
+        }
+        else{
+            this.continue();
+        }
+    }
 
+    private setupQuestion() {
+        this.clearPreviousElements();
+        this.displayQuestion();
+        this.displayOptions();
+        this.createSubmitButton();
+    }
+
+    private clearPreviousElements() {
+        this.optionElements.forEach(option => option.destroy());
+        this.optionElements = [];
+        this.questionText?.destroy();
+        this.submitButton?.destroy();
+    }
+
+    private displayQuestion() {
+        const question = quizManager.getQuestion(this.currentQuestionIndex);
+        this.questionText = this.add.text(100, 50, '> ' + question, {
+            fontFamily: 'Courier New',
+            fontSize: '24px',
+            color: '#00ff00',
+            wordWrap: { width: 700 },
+            stroke: '#003300',
+            strokeThickness: 2
+        });
+    }
+
+    private displayOptions() {
+        const options = quizManager.getOptions(this.currentQuestionIndex);
+        this.selectedAnswers = new Array(options.length).fill(false);
+
+        let yPosition = 150;
+        options.forEach((option, index) => {
+            const optionText = this.add.text(100, yPosition, `[${index + 1}] ${option}`, {
+                fontFamily: 'Courier New',
+                fontSize: '20px',
+                color: '#00ff00',
+                stroke: '#003300',
+                strokeThickness: 2,
+                padding: { x: 10, y: 5 }
+            })
+            .setInteractive()
+            .on('pointerdown', () => this.toggleOption(index))
+            .on('pointerover', () => {
+                optionText.setColor('#00ffff');
+                optionText.setStroke('#005500', 3);
+            })
+            .on('pointerout', () => {
+                optionText.setColor('#00ff00');
+                optionText.setStroke('#003300', 2);
+            });
+
+            this.optionElements.push(optionText);
+            yPosition += 50;
+        });
+    }
+
+    private createSubmitButton() {
+        this.submitButton = this.add.text(100, 400, '> SUBMIT', {
+            fontFamily: 'Courier New',
+            fontSize: '24px',
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2,
+            padding: { x: 10, y: 5 }
+        })
+        .setInteractive()
+        .on('pointerdown', () => this.handleAnswerSubmission())
+        .on('pointerover', () => {
+            this.submitButton.setColor('#00ffff');
+            this.submitButton.setStroke('#005500', 3);
+        })
+        .on('pointerout', () => {
+            this.submitButton.setColor('#00ff00');
+            this.submitButton.setStroke('#003300', 2);
+        });
+    }
+
+    private toggleOption(index: number) {
+        this.selectedAnswers[index] = !this.selectedAnswers[index];
+        const option = this.optionElements[index];
+        const text = this.selectedAnswers[index] ? `> ${option.text}` : option.text.replace(/^> /, '');
+        option.setText(text);
+        option.setStyle({ 
+            color: this.selectedAnswers[index] ? '#00ff55' : '#00ff00',
+            stroke: this.selectedAnswers[index] ? '#005500' : '#003300'
+        });
+    }
+
+    private handleAnswerSubmission() {
+        quizManager.answerMultipleChoiceQuestion(this.currentQuestionIndex, this.selectedAnswers);
+        const isCorrect = quizManager.isAnswerCorrect(this.currentQuestionIndex);
+        this.showQuestionFeedback(isCorrect);
+    }
+
+    private showQuestionFeedback(isCorrect: boolean) {
+        this.clearInteractiveElements();
+        this.displayInfoText(isCorrect);
+        this.createContinueButton();
+    }
+
+    private clearInteractiveElements() {
+        this.submitButton?.destroy();
+        this.optionElements.forEach(option => option.destroy());
+    }
+
+    private displayInfoText(isCorrect: boolean) {
+        const info = quizManager.getInfoText(this.currentQuestionIndex, isCorrect);
+        this.infoText = this.add.text(100, 400, '> ' + info, {
+            fontFamily: 'Courier New',
+            fontSize: '20px',
+            color: isCorrect ? '#00ff00' : '#ff5555',
+            stroke: isCorrect ? '#003300' : '#330000',
+            strokeThickness: 2,
+            wordWrap: { width: 700 },
+            padding: { x: 10, y: 10 }
+        });
+    }
+
+    private createContinueButton() {
+        this.continueButton = this.add.text(100, 500, '> CONTINUE', {
+            fontFamily: 'Courier New',
+            fontSize: '24px',
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2,
+            padding: { x: 10, y: 5 }
+        })
+        .setInteractive()
+        .on('pointerdown', () => this.proceedToNext())
+        .on('pointerover', () => {
+            this.continueButton.setColor('#00ffff');
+            this.continueButton.setStroke('#005500', 3);
+        })
+        .on('pointerout', () => {
+            this.continueButton.setColor('#00ff00');
+            this.continueButton.setStroke('#003300', 2);
+        });
+    }
+
+    private proceedToNext() {
+        this.infoText?.destroy();
+        this.continueButton?.destroy();
+
+        if (this.currentQuestionIndex < quizManager.getTotalQuestions() - 1) {
+            this.currentQuestionIndex++;
+            this.setupQuestion();
+        } else {
+            this.showFinalScore();
+        }
+    }
+
+    private showFinalScore() {
+        this.clearPreviousElements();
+        this.clearInteractiveElements();
+        
         const score = quizManager.calculateScore();
-        this.add.text(512, 384, `Dein Ergebnis: ${score} / ${quizManager.getTotalQuestions()}`, {
-            fontFamily: 'Arial Black', fontSize: 36, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 3,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);
-
-        const endText = this.add.text(512, 700, 'Drücke die Leertaste um zurückzukehren', { font: '24px Arial', color: '#fff' })
-            .setDepth(100).setOrigin(0.5);
-
-        this.tweens.add({
-            targets: endText,
-            scale: { from: 0.95, to: 1.05 },
-            duration: 1500,
-            yoyo: true,
-            repeat: -1
+        const total = quizManager.getTotalQuestions();
+        
+        this.add.text(100, 100, '> QUIZ COMPLETE', { 
+            fontFamily: 'Courier New',
+            fontSize: '32px', 
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2
         });
+        
+        this.add.text(100, 150, `> SCORE: ${score}/${total}`, { 
+            fontFamily: 'Courier New',
+            fontSize: '28px', 
+            color: '#00ffff',
+            stroke: '#003300',
+            strokeThickness: 2
+        });
+        
+        // Restart option
+        this.continueText = this.add.text(100, 250, '> Continue', {
+            fontFamily: 'Courier New',
+            fontSize: '24px',
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2,
+            padding: { x: 10, y: 5 }
+        })
+        .setInteractive()
+        .on('pointerdown', () => this.continue())
+        .on('pointerover', () => {
+            this.continueText.setColor('#00ffff');
+            this.continueText.setStroke('#005500', 3);
+        })
+        .on('pointerout', () => {
+            this.continueText.setColor('#00ff00');
+            this.continueText.setStroke('#003300', 2);
+        });
+    }
 
-        const spaceBar = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        spaceBar.on('down', () => this.scene.start('InfoScreen'));
+    private continue() {
+        quizManager.reset();
+        this.currentQuestionIndex = 0;
+        console.log('Continue');
     }
 }

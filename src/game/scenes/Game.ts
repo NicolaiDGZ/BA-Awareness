@@ -270,50 +270,50 @@ export class Game extends Scene
         }
     }
 
-    createCloseButton(image: Phaser.GameObjects.Image){
+    createCloseButton(image: Phaser.GameObjects.Image) {
         // Button-Koordinaten berechnen (unterhalb des Bildes)
-        const buttonx = image.x - 80; // Zentriere den Button horizontal, daher -50
-        const buttony = image.y + image.height / 2 + 50; // 50px unter dem Bild
-    
+        const buttonx = image.x - 80;
+        const buttony = image.y + image.height / 2 + 50;
+        
+        // Container erstellen
+        const closeButtonContainer = this.add.container(0, 0);
+        closeButtonContainer.setScale(1 / 3);
+        
         // Graphics-Objekt für den Button erstellen
         const closeButton = this.add.graphics()
             .fillStyle(0xFF5252, 1)
             .fillRoundedRect(buttonx, buttony, 160, 50, 15)
             .lineStyle(5, 0x0, 1)
-            .strokeRoundedRect(buttonx, buttony, 160, 50, 15)
-            .setScrollFactor(0)
-            .setDepth(100);
-    
-        // Button-Text hinzufügen und zentrieren
+            .strokeRoundedRect(buttonx, buttony, 160, 50, 15);
+        
+        // Button-Text hinzufügen
         const buttonText = this.add.text(buttonx + 80, buttony + 25, 'Schließen', {
             fontSize: '24px',
             color: '#000000',
             fontFamily: 'Arial',
             align: 'center'
-        })
-            .setOrigin(0.5, 0.5)
-            .setScrollFactor(0)
-            .setDepth(100);
-    
-        // Add fake rectangele
-        const buttonContainer = this.add.rectangle(buttonx,buttony,160,50)
-            .setOrigin(0,0)
-            .setInteractive({ useHandCursor: true })
-            .setScrollFactor(0)
-            .setDepth(100);
+        }).setOrigin(0.5, 0.5);
+        
+        // Interaktives Rechteck als Button-Hitbox
+        const buttonContainer = this.add.rectangle(buttonx, buttony, 160, 50)
+            .setOrigin(0, 0)
+            .setInteractive({ useHandCursor: true });
+        
         // Button Klick-Event
         buttonContainer.on('pointerdown', () => {
-            console.log("Close Button Clicked")
+            console.log("Close Button Clicked");
             image.setVisible(false);
             image.destroy();
-            buttonContainer.setVisible(false);
-            buttonText.setVisible(false);
-            closeButton.setVisible(false);
-            closeButton.destroy();
-            buttonContainer.destroy();
-            buttonText.destroy();
+            closeButtonContainer.destroy();
         });
+        
+        // Alle Elemente zum Container hinzufügen
+        closeButtonContainer.add([closeButton, buttonText, buttonContainer]);
+        
+        // Container zur Szene hinzufügen
+        this.add.existing(closeButtonContainer);
     }
+    
     addTask() {
         if(taskBox.tasks.every(task => task.completed == true)){
             this.secondStage = true;

@@ -11,6 +11,7 @@ import { InfoBoxScene } from './scenes/InfoBoxScene';
 import { QuizScene } from './scenes/QuizScene.ts';
 import { RecapScene } from './scenes/RecapScene.ts';
 import { Indoor } from './scenes/Indoor.ts';
+import { PopupScene } from './scenes/PopupScene.ts';
 
 
 //  Find out more information about the Game Config at:
@@ -33,8 +34,9 @@ const config: Phaser.Types.Core.GameConfig = {
         InfoBoxScene,
         RecapScene,
         Indoor,
-        //QuizScene,
-        InfoScreen
+        QuizScene,
+        InfoScreen,
+        PopupScene
     ],
     physics: {
         default: 'matter',
@@ -58,7 +60,8 @@ const config: Phaser.Types.Core.GameConfig = {
     scale: { 
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-    }
+    },
+    antialias: true
 };
 
 const StartGame = (parent: string) => {
