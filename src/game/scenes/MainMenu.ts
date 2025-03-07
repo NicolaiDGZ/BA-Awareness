@@ -46,7 +46,8 @@ export class MainMenu extends Scene {
             { text: 'Steuerung', scene: 'VisitorPass' },
             { text: 'Credits', scene: 'Credits' },
             { text: 'DevTest', scene: 'Indoor' },
-            { text: 'DevTestQuiz', scene: 'QuizScene' }
+            { text: 'DevTestQuiz', scene: 'QuizScene' },
+            { text: 'DevTestPhishing', scene: 'SpearPhishingScene' }
         ];
 
         this.buttons = buttonData.map((data, index) => {

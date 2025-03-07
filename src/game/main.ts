@@ -12,6 +12,7 @@ import { QuizScene } from './scenes/QuizScene.ts';
 import { RecapScene } from './scenes/RecapScene.ts';
 import { Indoor } from './scenes/Indoor.ts';
 import { PopupScene } from './scenes/PopupScene.ts';
+import { SpearPhishingScene } from './scenes/SpearPhishingScene.ts';
 
 
 //  Find out more information about the Game Config at:
@@ -36,7 +37,8 @@ const config: Phaser.Types.Core.GameConfig = {
         Indoor,
         QuizScene,
         InfoScreen,
-        PopupScene
+        PopupScene,
+        SpearPhishingScene
     ],
     physics: {
         default: 'matter',

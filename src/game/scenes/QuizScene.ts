@@ -280,6 +280,10 @@ export class QuizScene extends Scene {
     private continue() {
         quizManager.reset();
         this.currentQuestionIndex = 0;
-        console.log('Continue');
+        
+        this.scene.start('InfoScreen', {
+            title: 'Rückblick',
+            message: 'In dieser Mission haben wir wichtige Lektionen über die Informationssicherheit gelernt:\n\n> Auch scheinbar unwichtige Informationen können von Angreifern oder Social Engineers genutzt werden, um Schaden anzurichten.\n\n> Mitarbeiter sollten daher sorgsam achten, welche Informationen sie wie entsorgen.\n\n> Sensible Informationen dürfen nicht in der öffentlichkeit besprochen werden, um potenzielle Abhörversuche vorzubeugen.\n\nWeitere Informationen finden Sie im E-Learning zur Informationssicherheit.',
+            scene: '#InfoScreen'});
     }
 }

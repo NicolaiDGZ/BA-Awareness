@@ -53,6 +53,7 @@ export class Indoor extends Scene
         //TaskBox
         this.scene.launch('InfoBoxScene');
         this.scene.bringToTop('InfoBoxScene');
+        taskBox.clearTasks();
         taskBox.title = "Aufgaben";
         taskBox.addTask('Durchsuche die Büros\nnach Informationen',false);
         this.time.delayedCall(10,()=>{taskBox.updateTasks();});
@@ -122,6 +123,7 @@ export class Indoor extends Scene
         this.player.update(delta);
         this.interact();
         this.bot.update();
+
     }
 
     interact(){
@@ -248,6 +250,11 @@ export class Indoor extends Scene
                             });
                             this.scene.pause();
                         }
+                        break;
+                    }
+                    case 11:{
+                        this.scene.start("SpearPhishingScene");
+                        this.scene.stop('InfoBoxScene');
                         break;
                     }
                     default:{
@@ -406,6 +413,7 @@ export class Indoor extends Scene
             { x: 4, y: 12 },
             { x: 7, y: 10 },
             { x: 4.9, y: 17.3 },
+            { x: 9, y: 23}
         ]
 
         this.highlightObjects = [];

@@ -37,6 +37,7 @@ export class Preloader extends Scene
         this.load.image('closeButton', 'closeButton.png');
         this.load.image('worker1', 'worker1.png');
         this.load.image('worker2', 'worker2.png');
+        this.load.image('bouncer', 'bouncer.png');
         this.load.image('desk', 'desk.png');
         this.load.image('learnings', 'learnings.png');
         this.load.image('backgroundImage','ui/backgroundImage.png')

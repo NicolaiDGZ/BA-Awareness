@@ -17,14 +17,31 @@ export class InfoScreen extends Scene
         super('InfoScreen');
     }
 
+    /**
+     * Initializes the InfoScreen scene with provided data.
+     * 
+     * @param data - An object containing initialization data for the scene.
+     * @param data.title - The title to be displayed on the info screen.
+     * @param data.message - The main message content to be shown on the info screen.
+     * @param data.scene - The name of the scene to transition to after this info screen.
+     */
     init(data: { title: string; message: string, scene: string }){
         this.title = data.title;
         this.message = data.message;
         this.followingScene = data.scene;
     }
 
+
     
 
+    /**
+     * Creates and sets up the InfoScreen scene.
+     * This method initializes the visual elements of the InfoScreen, including the background,
+     * title text, main message text, and a blinking prompt. It also sets up the input handling
+     * for transitioning to the next scene.
+     * 
+     * @returns {void} This method doesn't return a value.
+     */
     create() {
         // Set terminal-style background
         this.cameras.main.setBackgroundColor('#001100');
@@ -71,7 +88,16 @@ export class InfoScreen extends Scene
         // Input handling
         const enterKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         enterKey.on('down', () => {
-            this.scene.start(this.followingScene);
+            if(this.followingScene == '#InfoScreen'){
+                this.scene.start('InfoScreen', {
+                    title: 'Dirty Desk',
+                    message: 'Super, Sie haben einen Übergangsausweis gefälscht.\n\nDamit kommen Sie an dem Sicherheitspersonal vorbei ins Bürogebäude.\n\nWelche Informationen können Sie hier finden, die es Ihnen erlaubt eine personalisierte Phishing-Email an einen Mitarbeiter zu senden?',
+                    scene: 'Game'});
+            }
+            else{
+                this.scene.start(this.followingScene);
+            }
         });
     }
+
 }

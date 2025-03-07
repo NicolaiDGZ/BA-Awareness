@@ -34,6 +34,12 @@ class TaskBox{
             this.updateTasks();
         }
     }
+
+    clearTasks() {
+        this.tasks = []; // Empty the tasks list
+        this.updateTasks(); // Notify listeners that the task list has been cleared
+    }
+
 }
 
 export const taskBox = new TaskBox();

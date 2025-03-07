@@ -1,7 +1,4 @@
-import { Console, debug } from 'console';
-import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
-import PhaserMatterCollisionPlugin from 'phaser-matter-collision-plugin';
 import { taskBox } from './components/taskBox';
 import Bot from './components/Bot';
 import Player from './components/Player';
@@ -11,7 +8,6 @@ export class Game extends Scene
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
     gameText: Phaser.GameObjects.Text;
-    //player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     player: Player;
     playerMovementSpeed: integer
@@ -33,6 +29,24 @@ export class Game extends Scene
         super('Game');
     }
 
+    /**
+     * Initializes and sets up the game scene.
+     * This method is called automatically by the Scene Manager when the scene starts.
+     * It sets up the game environment, including UI elements, player, camera, and NPCs.
+     * 
+     * @remarks
+     * This method performs the following tasks:
+     * - Creates and displays control instructions
+     * - Initializes the task box and sets initial tasks
+     * - Sets up game parameters and interaction keys
+     * - Configures the camera and its effects
+     * - Loads map tiles and creates the player
+     * - Sets up colliders for interactive elements
+     * - Configures camera follow behavior
+     * - Creates and sets paths for NPC bots
+     * 
+     * @returns void This method does not return a value.
+     */
     create ()
     {
         //ControlsImage
@@ -44,9 +58,15 @@ export class Game extends Scene
         //TaskBox
         this.scene.launch('InfoBoxScene');
         this.scene.bringToTop('InfoBoxScene');
+        taskBox.clearTasks();
         taskBox.title = "Aufgaben";
-        taskBox.addTask('Durchsuche die Müllcontainer\nnach Informationen',false);
-        taskBox.addTask('Belausche die Mitarbeiter',false);
+        const canGoIndoor = this.registry.get('canGoIndoor') || false;
+        if(canGoIndoor){
+            taskBox.addTask('Begebe dich in das Bürogebäude',false);
+        }else{
+            taskBox.addTask('Durchsuche die Müllcontainer\nnach Informationen',false);
+            taskBox.addTask('Belausche die Mitarbeiter',false);
+        }
         this.time.delayedCall(500,()=>{taskBox.updateTasks();});
         //Parameters
         this.canPerformAction = false;
@@ -92,6 +112,24 @@ export class Game extends Scene
 
     }
 
+
+    /**
+     * Sets up collision detection for various game objects.
+     * This method creates and configures collision areas for garbage bins, worker area, van, and entrance.
+     * It defines the behavior when the player collides with or leaves these areas.
+     * 
+     * @remarks
+     * This method performs the following tasks:
+     * - Creates rectangular collision areas for three garbage bins, worker area, van, and entrance.
+     * - Sets up collision detection between the player and these areas.
+     * - Defines behavior for when the player enters or leaves these areas, such as:
+     *   - Enabling/disabling interaction possibilities.
+     *   - Showing/hiding action text.
+     *   - Setting interaction IDs.
+     *   - Triggering conversations or scene changes.
+     * 
+     * @returns void This method does not return a value.
+     */
     setColliders(){
         //GarbageBin1
         const garbageBin1Collider = this.matter.add.rectangle(12*32-30,22*32,32,64);
@@ -144,9 +182,6 @@ export class Game extends Scene
             this.inArea = true;
             this.time.delayedCall(3000,this.createConversation.bind(this))
         });
-        workerArea.onCollideEndCallback = () => {
-            this.inArea = false;
-        }
 
         //Van
         const vanArea = this.matter.add.rectangle(53*32,17*32,(3+4)*32,(7+4)*32);
@@ -162,7 +197,34 @@ export class Game extends Scene
             this.infoText.setVisible(false);
             this.interActionID = 0;
          }
+         //Entrance
+        const entranceArea = this.matter.add.rectangle(19.5*32,32*32,(3)*32,(2)*32);
+        entranceArea.isStatic = true;
+        entranceArea.isSensor = true;
+        entranceArea.setOnCollideWith(this.player.getBody(), () => {
+            this.canPerformAction = true;
+            this.time.delayedCall(3000,this.showActionText.bind(this));
+            this.interActionID = 5;
+        });
+        entranceArea.onCollideEndCallback = () => { 
+            this.canPerformAction = false;
+            this.infoText.setVisible(false);
+            this.interActionID = 0;
+         }
     }
+
+    /**
+     * Creates a conversation sequence using speech bubbles.
+     * This method generates a series of speech bubbles to simulate a conversation between characters.
+     * It also completes a task and adds a new one after the conversation ends.
+     * 
+     * @remarks
+     * The conversation only occurs if the player is in the designated area (this.inArea is true).
+     * Each speech bubble is created with a delay to simulate the timing of a real conversation.
+     * After the conversation, it marks a task as complete and potentially adds a new task.
+     * 
+     * @returns void This method does not return a value.
+     */
     createConversation() {
         if(this.inArea){
             this.createSpeechBubble(28*32-20,34*32-150,300,100,"Hast du schon mitbekommen, dass wir einen neuen Mitarbeiter bekommen?",3000);
@@ -177,6 +239,17 @@ export class Game extends Scene
         }
     }
 
+
+    /**
+     * Displays the action text when the player can perform an action.
+     * This function is typically called after a delay when the player stays in an interactive area.
+     * 
+     * @remarks
+     * The function checks if an action can be performed (canPerformAction flag) before showing the text.
+     * It also logs a message to the console for debugging purposes.
+     * 
+     * @returns void This function does not return a value.
+     */
     showActionText(){
         if (this.canPerformAction) {
             this.infoText.setVisible(true);
@@ -184,12 +257,23 @@ export class Game extends Scene
         }
     }
 
-    update(time:number, delta: number){
+
+    /**
+     * Updates the game state for each frame.
+     * This method is called automatically by the Phaser game loop.
+     * 
+     * @param time - The current time in milliseconds since the game started.
+     * @param delta - The time in milliseconds since the last frame.
+     * 
+     * @returns void This method does not return a value.
+     */
+    update(delta: number) {
         this.interact();
         this.player.update(delta);
         this.bot1.update();
         this.bot.update();
     }
+
 
     interact(){
         if(this.canPerformAction){
@@ -198,10 +282,12 @@ export class Game extends Scene
                     case 1:{
                         //Garbage1
                         if(!this.allContainersChecked[0]){
-                            const image = this.add.image(1024/2,768/2,'visitor_pass');
-                            image.setScrollFactor(0);
-                            image.setDepth(99);
-                            this.createCloseButton(image);
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "visitor_pass", 
+                                imageScale: 1, 
+                                returnScene: "Game" 
+                            });
+                            this.scene.pause();
                             this.allContainersChecked[0] = true;
                             if(this.allContainersChecked.every(Boolean)){
                                 taskBox.completeTask(0);
@@ -213,10 +299,12 @@ export class Game extends Scene
                     case 2:{
                         //Garbage2
                         if(!this.allContainersChecked[1]){
-                            const image = this.add.image(1024/2,768/2,'nothingtofind');
-                            image.setScrollFactor(0);
-                            image.setDepth(99);
-                            this.createCloseButton(image);
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "nothingtofind", 
+                                imageScale: 1, 
+                                returnScene: "Game" 
+                            });
+                            this.scene.pause();
                             this.allContainersChecked[1] = true;
                             if(this.allContainersChecked.every(Boolean)){
                                 taskBox.completeTask(0);
@@ -228,13 +316,13 @@ export class Game extends Scene
                     case 3:{
                         //Garbage3
                         if(!this.allContainersChecked[2]){
-                            const image = this.add.image(1024/2,768/2,'cv');
-                            image.setScrollFactor(0);
-                            image.setDepth(99);
+                            this.scene.launch("PopupScene", { 
+                                imageKey: "cv", 
+                                imageScale: 1, 
+                                returnScene: "Game" 
+                            });
+                            this.scene.pause();
                             this.allContainersChecked[2] = true;
-
-                            this.createCloseButton(image);
-                            
                             if(this.allContainersChecked.every(Boolean)){
                                 taskBox.completeTask(0);
                                 this.addTask();
@@ -258,6 +346,18 @@ export class Game extends Scene
                                 text.setVisible(false);
                                 text.destroy();
                             });
+                        }
+                        break;
+                    }
+                    case 5:{
+                        //Entrance
+                        const canGoIndoor = this.registry.get('canGoIndoor') || false;
+                        if(canGoIndoor){
+                            this.scene.start('Indoor');
+                            this.scene.stop('Game');
+                        }
+                        else{
+                            this.createSpeechBubble(19*32,26*32,450,100,'Sorry, um hier reinzukommen, brauchst du einen \nMitarbeiter oder Gästeausweis.',1500);
                         }
                         break;
                     }
@@ -331,15 +431,15 @@ export class Game extends Scene
         const ts_office = map.addTilesetImage('ts_office');
         const ts_post_office = map.addTilesetImage('ts_post_office');
 
-        const floor = map.createLayer('Floor', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
+        map.createLayer('Floor', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
         const office = map.createLayer('Office', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
         const cityProps = map.createLayer('CityProps',[ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
         const cityProps2 = map.createLayer('CityProps2', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
         const cityPropsAbovePlayer = map.createLayer('CityPropsAbovePlayer', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
         const cityProps2AbovePlayer = map.createLayer('CityProps2AbovePlayer', [ts_city_terrains!,ts_terrains_fences!,ts_vehicles!,ts_city_props!,ts_post_office!,ts_office!]);
 
-        cityPropsAbovePlayer?.setDepth(2);
-        cityProps2AbovePlayer?.setDepth(2);
+        cityPropsAbovePlayer?.setDepth(10);
+        cityProps2AbovePlayer?.setDepth(10);
 
         cityProps?.setCollisionFromCollisionGroup(true);
         cityProps2?.setCollisionFromCollisionGroup(true);
@@ -353,6 +453,7 @@ export class Game extends Scene
         //Load workers
         this.matter.add.sprite(28*32,34*32,'worker1').setScale(2,2).setStatic(true);
         this.matter.add.sprite(30*32,34*32,'worker2').setScale(2,2).setStatic(true);
+        this.matter.add.sprite(20.2*32,31*32,'bouncer').setScale(0.8).setStatic(true);
     }
 
     loadUI(){

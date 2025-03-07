@@ -17,20 +17,21 @@ export class VisitorPass extends Scene {
         this.cameras.main.setBackgroundColor('#001100');
 
         // Title
-        this.add.text(512, 30, '> ÜBERGANGSSCHEIN FÄLSCHEN', {
+        this.add.text(512, 30, '> MITARBEITERKARTE FÄLSCHEN', {
             fontFamily: 'Courier New',
             fontSize: '38px',
             color: '#00ff00',
             stroke: '#003300',
             strokeThickness: 2
-        }).setOrigin(0.5);
+        }).setOrigin(0.5)
+            .on('pointerdown', () => this.scene.start('RecapScene'));
 
         // Keynotes
         this.add.text(100, 60, 
             '> Notizen:\n' +
             '- gefundene Dokumente:  x Besucherausweis     x Bewerbungsunterlagen\n' +
             '- aus dem Gespräch\n  - Mitarbeiter fängt Montag (16.11.2033) an\n  - Aussehen ist Kollegen unbekannt\n' +
-            '- weiteres Vorgehen\n  - Übergangskarte fälschen\n  - sich am Montag als neuer Mitarbeiter ausgeben\n' + 
+            '- weiteres Vorgehen\n  - Mitarbeiterkarte fälschen\n  - sich am Montag als neuer Mitarbeiter ausgeben\n' + 
             '----------------------------------------------------------------------',
             {
                 fontFamily: 'Courier New',
@@ -90,7 +91,7 @@ export class VisitorPass extends Scene {
         const labels = ['Nummer:', 'Nachname:', 'Vorname:', 'E-Mail:', 'Gültig bis:'];
         yPos = 460;
         
-        labels.forEach((label, index) => {
+        labels.forEach((label) => {
             this.add.text(100, yPos - 9, label, {
                 fontFamily: 'Courier New',
                 fontSize: '20px',
@@ -143,7 +144,7 @@ export class VisitorPass extends Scene {
             this.WINumber = "Fehler bei der Nummer\nHinweis: Schaue nochmal in den Besucherausweis,\n wie die Nummer aufgebaut ist.";
         }else{
             //Everything right!!
-            this.scene.start("RecapScene");
+            this.nextScene();
         }
     }
 
@@ -200,5 +201,11 @@ export class VisitorPass extends Scene {
             errorBox.destroy();
             this.inputFields.forEach(field => field.setVisible(true));
         });
+    }
+
+    private nextScene(){
+        this.registry.set('canGoIndoor', true);
+        this.scene.start('QuizScene');
+        this.scene.stop('VisitorPass');
     }
 }
