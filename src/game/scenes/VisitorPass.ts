@@ -1,4 +1,6 @@
 import { Scene } from "phaser";
+import { sceneManager } from "./components/SceneManager";
+import { customEmitter, TASK_EVENTS } from "./components/events";
 
 
 export class VisitorPass extends Scene {
@@ -13,39 +15,25 @@ export class VisitorPass extends Scene {
     }
     
     create() {
+        //Visible
+        customEmitter.on(TASK_EVENTS.SET_VISIBLE ,() => this.inputFields.forEach(field => field.setVisible(true)));
         // Set terminal-style background
         this.cameras.main.setBackgroundColor('#001100');
 
         // Title
-        this.add.text(512, 30, '> MITARBEITERKARTE FÄLSCHEN', {
+        this.add.text(512, 50, '> MITARBEITENDENKARTE FÄLSCHEN', {
             fontFamily: 'Courier New',
             fontSize: '38px',
             color: '#00ff00',
             stroke: '#003300',
             strokeThickness: 2
         }).setOrigin(0.5)
-            .on('pointerdown', () => this.scene.start('RecapScene'));
-
-        // Keynotes
-        this.add.text(100, 60, 
-            '> Notizen:\n' +
-            '- gefundene Dokumente:  x Besucherausweis     x Bewerbungsunterlagen\n' +
-            '- aus dem Gespräch\n  - Mitarbeiter fängt Montag (16.11.2033) an\n  - Aussehen ist Kollegen unbekannt\n' +
-            '- weiteres Vorgehen\n  - Mitarbeiterkarte fälschen\n  - sich am Montag als neuer Mitarbeiter ausgeben\n' + 
-            '----------------------------------------------------------------------',
-            {
-                fontFamily: 'Courier New',
-                fontSize: '20px',
-                color: '#00ff00',
-                stroke: '#003300',
-                strokeThickness: 1,
-                lineSpacing: 10
-            }
-        );
+            .on('pointerdown', () => this.nextScene());
 
         // Document Options
-        const options = ['Visum anzeigen', 'Lebenslauf anzeigen'];
-        let yPos = 320;
+        const options = ['Notizen anzeigen','Visum anzeigen', 'Lebenslauf anzeigen', 'Social Media Post anzeigen'];
+        const images = ['notesVisitorPass', 'visitor_pass', 'cv', 'socialMediaPost'];
+        let yPos = 130;
         
         options.forEach((option, index) => {
             const optionText = this.add.text(100, yPos, `[ ] ${option}`, {
@@ -58,12 +46,20 @@ export class VisitorPass extends Scene {
             .setInteractive()
             .on('pointerover', () => optionText.setText(`[>] ${option}`))
             .on('pointerout', () => optionText.setText(`[ ] ${option}`))
-            .on('pointerdown', () => this.loadImage(index === 0 ? 'visitor_pass' : 'cv'));
+            .on('pointerdown', () => this.loadImage(images[index] || 'nothingtofind'));
+
+            // this.tweens.add({
+            //     targets: optionText,
+            //     alpha: { from: 0.6, to: 1 },
+            //     duration: 800,
+            //     yoyo: true,
+            //     repeat: -1
+            // });
 
             yPos += 50;
         });
 
-        this.add.text(100, 410, 
+        this.add.text(100, 330, 
             '----------------------------------------------------------------------',
             {
                 fontFamily: 'Courier New',
@@ -88,8 +84,8 @@ export class VisitorPass extends Scene {
             padding: { left: 10, right: 10 }
         };
 
-        const labels = ['Nummer:', 'Nachname:', 'Vorname:', 'E-Mail:', 'Gültig bis:'];
-        yPos = 460;
+        const labels = ['Nummer:', 'Nachname:', 'Vorname:', 'E-Mail:', 'Gültig ab:'];
+        yPos = 400;
         
         labels.forEach((label) => {
             this.add.text(100, yPos - 9, label, {
@@ -119,6 +115,14 @@ export class VisitorPass extends Scene {
         .on('pointerover', () => verifyButton.setColor('#00ffff'))
         .on('pointerout', () => verifyButton.setColor('#00ff00'))
         .on('pointerdown', () => this.confirm());
+
+        this.tweens.add({
+            targets: verifyButton,
+            scale: { from: 0.95, to: 1.05 },
+            duration: 800,
+            yoyo: true,
+            repeat: -1
+        });
     }
 
     confirm(){
@@ -130,10 +134,10 @@ export class VisitorPass extends Scene {
             //firstname wrong
             this.wrongInput(this.WIFirstname);
             this.WIFirstname = "Fehler bei dem Vornamen\nHinweis: Schaue nochmal in die Notizen,\n als welche Person du dich ausgeben möchtest.";
-        }else if(this.inputFields[3].text != 'jonas.federer@pdg.de'){
+        }else if(this.inputFields[3].text != 'jonas.federer@g-neric.de'){
             //mail wrong
             this.wrongInput(this.WIMail);
-            this.WIMail = "Fehler bei der Mail\nHinweis: Schaue nochmal, ob du die Email-Adresse schon irgendwo gefunden hast.";
+            this.WIMail = "Fehler bei der Mail\nHinweis: Schaue nochmal, ob du eine ähnliche \nUnternehmens-Email-Adresse schon irgendwo gefunden hast.";
         }else if(this.inputFields[4].text != '16.11.2033'){
             //valid wrong
             this.wrongInput(this.WIValid);
@@ -149,34 +153,41 @@ export class VisitorPass extends Scene {
     }
 
     private loadImage(key: string) {
+        // this.inputFields.forEach(field => field.setVisible(false));
+        // // Dark overlay
+        // const overlay = this.add.rectangle(0, 0, 1024, 768, 0x000000, 0.8)
+        //     .setOrigin(0, 0)
+        //     .setInteractive();
+
+        // // Image display
+        // const image = this.add.image(512, 384, key)
+        //     .setDepth(1);
+
+        // // Close button
+        // const closeButton = this.add.text(512, 650, '> SCHLIEßEN', {
+        //     fontFamily: 'Courier New',
+        //     fontSize: '24px',
+        //     color: '#00ff00',
+        //     stroke: '#003300',
+        //     strokeThickness: 2
+        // })
+        // .setOrigin(0.5)
+        // .setInteractive()
+        // .on('pointerover', () => closeButton.setColor('#00ffff'))
+        // .on('pointerout', () => closeButton.setColor('#00ff00'))
+        // .on('pointerdown', () => {
+        //     overlay.destroy();
+        //     image.destroy();
+        //     closeButton.destroy();
+        //     this.inputFields.forEach(field => field.setVisible(true));
+        // });
         this.inputFields.forEach(field => field.setVisible(false));
-        // Dark overlay
-        const overlay = this.add.rectangle(0, 0, 1024, 768, 0x000000, 0.8)
-            .setOrigin(0, 0)
-            .setInteractive();
-
-        // Image display
-        const image = this.add.image(512, 384, key)
-            .setDepth(1);
-
-        // Close button
-        const closeButton = this.add.text(512, 650, '> SCHLIEßEN', {
-            fontFamily: 'Courier New',
-            fontSize: '24px',
-            color: '#00ff00',
-            stroke: '#003300',
-            strokeThickness: 2
-        })
-        .setOrigin(0.5)
-        .setInteractive()
-        .on('pointerover', () => closeButton.setColor('#00ffff'))
-        .on('pointerout', () => closeButton.setColor('#00ff00'))
-        .on('pointerdown', () => {
-            overlay.destroy();
-            image.destroy();
-            closeButton.destroy();
-            this.inputFields.forEach(field => field.setVisible(true));
+        this.scene.launch("PopupScene", { 
+            imageKey: key, 
+            imageScale: 1, 
+            returnScene: "VisitorPass" 
         });
+        this.scene.pause();
     }
 
     private wrongInput(message: string) {
@@ -196,7 +207,7 @@ export class VisitorPass extends Scene {
         .setOrigin(0.5)
         .setDepth(1);
 
-        this.time.delayedCall(3000, () => {
+        this.time.delayedCall(5000, () => {
             overlay.destroy();
             errorBox.destroy();
             this.inputFields.forEach(field => field.setVisible(true));
@@ -204,8 +215,8 @@ export class VisitorPass extends Scene {
     }
 
     private nextScene(){
-        this.registry.set('canGoIndoor', true);
-        this.scene.start('QuizScene');
-        this.scene.stop('VisitorPass');
+        this.registry.set('phase', 1);
+        const nextScene = sceneManager.getNextScene();
+        this.scene.start(nextScene?.key,nextScene?.data);
     }
 }

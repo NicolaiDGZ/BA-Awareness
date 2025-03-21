@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import { taskBox } from './components/taskBox';
 import Bot from './components/Bot';
 import Player from './components/Player';
+import { sceneManager } from './components/SceneManager';
 
 export class Game extends Scene
 {
@@ -23,6 +24,7 @@ export class Game extends Scene
     secondStage: boolean;
     bot: Bot;
     bot1: Bot;
+    canCreateSpeachBubble: boolean;
 
     constructor ()
     {
@@ -54,22 +56,25 @@ export class Game extends Scene
             .setDepth(100)
             .setScale(0.5)
             .setScrollFactor(0);
-        this.time.delayedCall(5000,() => controlimage.setVisible(false));
+        this.time.delayedCall(5000,() => {controlimage.setVisible(false); controlimage.destroy();});
         //TaskBox
         this.scene.launch('InfoBoxScene');
         this.scene.bringToTop('InfoBoxScene');
         taskBox.clearTasks();
         taskBox.title = "Aufgaben";
-        const canGoIndoor = this.registry.get('canGoIndoor') || false;
-        if(canGoIndoor){
+        const phase = this.registry.get('phase') || 0;
+        if(phase == 1){
             taskBox.addTask('Begebe dich in das Bürogebäude',false);
-        }else{
+        }else if(phase == 0){
             taskBox.addTask('Durchsuche die Müllcontainer\nnach Informationen',false);
             taskBox.addTask('Belausche die Mitarbeiter',false);
+        }else if(phase == 2){
+            taskBox.addTask('Kehre zu deinem Bus zurück',false);
         }
         this.time.delayedCall(500,()=>{taskBox.updateTasks();});
         //Parameters
         this.canPerformAction = false;
+        this.canCreateSpeachBubble = true;
         this.interActionID = 0;
         this.interActionKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.inArea = false;
@@ -81,9 +86,14 @@ export class Game extends Scene
         this.camera.postFX.addVignette(0.5, 0.5, 0.8,0.4);
         //Submethods for loading the essentials
         this.loadTiles();
-        this.player = new Player(this, 51 * 32, 15 * 32, 'ts_player');
+        if(phase == 2){
+            this.player = new Player(this, 19 * 32, 31 * 32, 'ts_player');
+        }else{
+            this.player = new Player(this, 51 * 32, 15 * 32, 'ts_player');
+        }
         this.loadUI();
         this.setColliders();
+        //this.spawnCar();
         //Camera follow setup
         this.camera.startFollow(this.player.getSprite(),false,0.01,0.01);
         this.cameras.main.setBounds(0, 0, 2016, 1408);
@@ -109,7 +119,13 @@ export class Game extends Scene
             { x: 19*32, y: 35*32 },
             { x: 19*32, y: 30*32 },
         ]);
+        this.events.on('shutdown',() => this.shutdown());
+    }
 
+    shutdown(){
+        console.log("Shutting down scene");
+        this.input.keyboard?.removeAllKeys();
+        this.input.keyboard?.removeAllListeners();
     }
 
 
@@ -131,72 +147,93 @@ export class Game extends Scene
      * @returns void This method does not return a value.
      */
     setColliders(){
-        //GarbageBin1
-        const garbageBin1Collider = this.matter.add.rectangle(12*32-30,22*32,32,64);
-        garbageBin1Collider.isStatic = true;
-        garbageBin1Collider.isSensor = true;
-        garbageBin1Collider.setOnCollideWith(this.player.getBody(),() => {
-            this.canPerformAction = true;
-            this.time.delayedCall(3000,this.showActionText.bind(this));
-            this.interActionID = 1;
-        });
-        garbageBin1Collider.onCollideEndCallback = () => { 
-            this.canPerformAction = false;
-            this.infoText.setVisible(false);
-            this.interActionID = 0;
-         }
-         //GarbageBin2
-        const garbageBin2Collider = this.matter.add.rectangle(12*32-30,25*32,32,64);
-        garbageBin2Collider.isStatic = true;
-        garbageBin2Collider.isSensor = true;
-        garbageBin2Collider.setOnCollideWith(this.player.getBody(),() => {
-            this.canPerformAction = true;
-            this.time.delayedCall(3000,this.showActionText.bind(this));
-            this.interActionID = 2;
-        });
-        garbageBin2Collider.onCollideEndCallback = () => { 
-            this.canPerformAction = false;
-            this.infoText.setVisible(false);
-            this.interActionID = 0;
-         }
-         //GarbageBin3
-        const garbageBin3Collider = this.matter.add.rectangle(12*32-30,28*32,32,64);
-        garbageBin3Collider.isStatic = true;
-        garbageBin3Collider.isSensor = true;
-        garbageBin3Collider.setOnCollideWith(this.player.getBody(),() => {
-            this.canPerformAction = true;
-            this.time.delayedCall(3000,this.showActionText.bind(this));
-            this.interActionID = 3;
-        });
-        garbageBin3Collider.onCollideEndCallback = () => { 
-            this.canPerformAction = false;
-            this.infoText.setVisible(false);
-            this.interActionID = 0;
-         }
+        const phase = this.registry.get('phase') || 0;
+        if(phase == 0){
+            
+            //GarbageBin1
+            const garbageBin1Collider = this.matter.add.rectangle(12*32-30,22*32,32,64);
+            garbageBin1Collider.isStatic = true;
+            garbageBin1Collider.isSensor = true;
+            garbageBin1Collider.setOnCollideWith(this.player.getBody(),() => {
+                this.canPerformAction = true;
+                this.time.delayedCall(3000,this.showActionText.bind(this));
+                this.interActionID = 1;
+            });
+            garbageBin1Collider.onCollideEndCallback = () => { 
+                this.canPerformAction = false;
+                this.infoText.setVisible(false);
+                this.interActionID = 0;
+            }
+            //GarbageBin2
+            const garbageBin2Collider = this.matter.add.rectangle(12*32-30,25*32,32,64);
+            garbageBin2Collider.isStatic = true;
+            garbageBin2Collider.isSensor = true;
+            garbageBin2Collider.setOnCollideWith(this.player.getBody(),() => {
+                this.canPerformAction = true;
+                this.time.delayedCall(3000,this.showActionText.bind(this));
+                this.interActionID = 2;
+            });
+            garbageBin2Collider.onCollideEndCallback = () => { 
+                this.canPerformAction = false;
+                this.infoText.setVisible(false);
+                this.interActionID = 0;
+            }
+            //GarbageBin3
+            const garbageBin3Collider = this.matter.add.rectangle(12*32-30,28*32,32,64);
+            garbageBin3Collider.isStatic = true;
+            garbageBin3Collider.isSensor = true;
+            garbageBin3Collider.setOnCollideWith(this.player.getBody(),() => {
+                this.canPerformAction = true;
+                this.time.delayedCall(3000,this.showActionText.bind(this));
+                this.interActionID = 3;
+            });
+            garbageBin3Collider.onCollideEndCallback = () => { 
+                this.canPerformAction = false;
+                this.infoText.setVisible(false);
+                this.interActionID = 0;
+            }
 
-        //WorkerArea
-        const workerArea = this.matter.add.rectangle(30*32,34*32,400,200);
-        workerArea.isStatic = true;
-        workerArea.isSensor = true;
-        workerArea.setOnCollideWith(this.player.getBody(), () => {
-            this.inArea = true;
-            this.time.delayedCall(3000,this.createConversation.bind(this))
-        });
+            //WorkerArea
+            const workerArea = this.matter.add.rectangle(29*32,35*32,6*32,4*32);
+            workerArea.isStatic = true;
+            workerArea.isSensor = true;
+            workerArea.setOnCollideWith(this.player.getBody(), () => {
+                this.inArea = true;
+                this.time.delayedCall(2000,this.createConversation.bind(this))
+            });
 
-        //Van
-        const vanArea = this.matter.add.rectangle(53*32,17*32,(3+4)*32,(7+4)*32);
-        vanArea.isStatic = true;
-        vanArea.isSensor = true;
-        vanArea.setOnCollideWith(this.player.getBody(), () => {
-            this.canPerformAction = true;
-            this.time.delayedCall(3000,this.showActionText.bind(this));
-            this.interActionID = 4;
-        });
-        vanArea.onCollideEndCallback = () => { 
-            this.canPerformAction = false;
-            this.infoText.setVisible(false);
-            this.interActionID = 0;
-         }
+            //Van
+            const vanArea = this.matter.add.rectangle(53.5*32,17.5*32,4.5*32,8*32);
+            vanArea.isStatic = true;
+            vanArea.isSensor = true;
+            vanArea.setOnCollideWith(this.player.getBody(), () => {
+                this.canPerformAction = true;
+                this.time.delayedCall(3000,this.showActionText.bind(this));
+                this.interActionID = 4;
+            });
+            vanArea.onCollideEndCallback = () => { 
+                this.canPerformAction = false;
+                this.infoText.setVisible(false);
+                this.interActionID = 0;
+            } 
+        }else if(phase == 1){
+            
+        }else if(phase == 2){
+            //Van
+            const vanArea = this.matter.add.rectangle(53.5*32,17.5*32,4.5*32,8*32);
+            vanArea.isStatic = true;
+            vanArea.isSensor = true;
+            vanArea.setOnCollideWith(this.player.getBody(), () => {
+                this.canPerformAction = true;
+                this.time.delayedCall(3000,this.showActionText.bind(this));
+                this.interActionID = 4;
+            });
+            vanArea.onCollideEndCallback = () => { 
+                this.canPerformAction = false;
+                this.infoText.setVisible(false);
+                this.interActionID = 0;
+            } 
+        }
          //Entrance
         const entranceArea = this.matter.add.rectangle(19.5*32,32*32,(3)*32,(2)*32);
         entranceArea.isStatic = true;
@@ -226,7 +263,8 @@ export class Game extends Scene
      * @returns void This method does not return a value.
      */
     createConversation() {
-        if(this.inArea){
+        if(this.inArea && this.canCreateSpeachBubble){
+            this.canCreateSpeachBubble = false;
             this.createSpeechBubble(28*32-20,34*32-150,300,100,"Hast du schon mitbekommen, dass wir einen neuen Mitarbeiter bekommen?",3000);
             this.time.delayedCall(3100,() => {this.createSpeechBubble(28*32+75,34*32-150,150,100,"Nein, ab wann denn?",3000);});
             this.time.delayedCall(3100*2,() => {this.createSpeechBubble(28*32-10,34*32-150,150,100,"Schon ab Montag",3000);});
@@ -332,11 +370,12 @@ export class Game extends Scene
                     }
                     case 4:{
                         //Van
-                        if(this.secondStage){
-                            this.scene.stop('Game');
+                        const phase = this.registry.get('phase') || 0;
+                        if(this.secondStage || phase == 2){
                             this.scene.stop('InfoBoxScene');
-                            this.scene.start('VisitorPass');
-                        }else{
+                            const nextScene = sceneManager.getNextScene();
+                            this.scene.start(nextScene?.key,nextScene?.data);
+                        }else if(phase == 0){
                             const text = this.add.text(1024/2, 768-100, 'Du musst erst die anderen Missionen erfüllen', { font: '24px Arial', color: '#fff' });
                             text.setVisible(true);
                             text.setScrollFactor(0);
@@ -346,18 +385,19 @@ export class Game extends Scene
                                 text.setVisible(false);
                                 text.destroy();
                             });
-                        }
+                        }else
                         break;
                     }
                     case 5:{
                         //Entrance
-                        const canGoIndoor = this.registry.get('canGoIndoor') || false;
-                        if(canGoIndoor){
-                            this.scene.start('Indoor');
-                            this.scene.stop('Game');
+                        const phase = this.registry.get('phase') || 0;
+                        if(phase == 1){
+                            this.scene.stop('InfoBoxScene');
+                            const nextScene = sceneManager.getNextScene();
+                            this.scene.start(nextScene?.key,nextScene?.data);
                         }
                         else{
-                            this.createSpeechBubble(19*32,26*32,450,100,'Sorry, um hier reinzukommen, brauchst du einen \nMitarbeiter oder Gästeausweis.',1500);
+                            this.createSpeechBubble(19*32,26*32,450,100,'Sorry, um hier reinzukommen, brauchst du einen \nMitarbeiter oder Gästeausweis.',5000);
                         }
                         break;
                     }
@@ -451,9 +491,15 @@ export class Game extends Scene
         this.matter.world.setBounds(0,32,2016,1408-32);
 
         //Load workers
-        this.matter.add.sprite(28*32,34*32,'worker1').setScale(2,2).setStatic(true);
-        this.matter.add.sprite(30*32,34*32,'worker2').setScale(2,2).setStatic(true);
+        
         this.matter.add.sprite(20.2*32,31*32,'bouncer').setScale(0.8).setStatic(true);
+        const phase = this.registry.get('phase') || 0;
+        if(phase == 1){
+        }else{
+            this.matter.add.sprite(28*32,34*32,'worker1').setScale(2,2).setStatic(true);
+            this.matter.add.sprite(30*32,34*32,'worker2').setScale(2,2).setStatic(true);
+        }
+        
     }
 
     loadUI(){
@@ -526,4 +572,42 @@ export class Game extends Scene
 
         this.time.delayedCall(destroyTime,()=>{content.setVisible(false);content.destroy;bubble.setVisible(false);bubble.destroy;})
     }
+
+    spawnCar() {
+        // Zufällige Verzögerung für den nächsten Spawn (zwischen 1 und 3 Sekunden)
+        const delay = Phaser.Math.Between(1000, 3000);
+        const carTextures = ['v_ambulance', 'v_blueCar', 'v_brownBus', 'v_camper', 'v_copperCar', 'v_greenCar', 'v_orangeCar', 'v_redCar', 'v_yellowBus'];
+        const roadY = 30*32;
+        this.time.delayedCall(delay, () => {
+            // Zufällige Textur auswählen
+            const texture = Phaser.Utils.Array.GetRandom(carTextures);
+
+            // Auto erstellen (außerhalb des Bildschirms rechts)
+            const car = this.matter.add.sprite(5000, roadY, texture);
+
+            // Geschwindigkeit setzen
+            const speed = Phaser.Math.Between(100, 200); // Zufällige Geschwindigkeit
+
+            car.setVelocityX(-speed);
+
+            // Wenn das Auto außerhalb des Bildschirms links ist, zerstören
+            car.setActive(true);
+            car.setVisible(true);
+
+            this.time.addEvent({
+                delay: 50,
+                callback: () => {
+                    if (car.x < -50) {
+                        car.destroy();
+                    }
+                },
+                loop: true
+            });
+
+            // Nächstes Auto spawnen
+            this.spawnCar();
+        });
+    }
+
+
 }

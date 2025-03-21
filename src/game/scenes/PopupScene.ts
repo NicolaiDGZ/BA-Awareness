@@ -1,4 +1,5 @@
 import { Scene } from "phaser";
+import { customEmitter, TASK_EVENTS } from "./components/events";
 
 export class PopupScene extends Scene {
     private image: Phaser.GameObjects.Image;
@@ -107,6 +108,7 @@ export class PopupScene extends Scene {
             })
             .on("pointerdown", () => {
                 this.scene.resume(this.returnScene);
+                customEmitter.emit(TASK_EVENTS.SET_VISIBLE);
                 this.scene.stop();
             });
 

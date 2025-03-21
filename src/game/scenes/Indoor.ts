@@ -5,6 +5,7 @@ import { taskBox } from './components/taskBox';
 import  Bot  from './components/Bot';
 import  Player  from './components/Player';
 import { BodyType } from 'matter';
+import { sceneManager } from './components/SceneManager';
 
 export class Indoor extends Scene
 {
@@ -36,6 +37,7 @@ export class Indoor extends Scene
     cameraGraphic: any;
     direction: number;
     highlightObjects: any;
+    outDoor: BodyType;
 
     constructor ()
     {
@@ -44,18 +46,16 @@ export class Indoor extends Scene
 
     create ()
     {
-        //ControlsImage
-        const controlimage = this.add.image(1024/2,768-100,'controls')
-            .setDepth(100)
-            .setScale(0.5)
-            .setScrollFactor(0);
-        this.time.delayedCall(5000,() => controlimage.setVisible(false));
+        //Outdoor blocker
+        this.outDoor = this.matter.add.rectangle(9.5*32,23.5*32,32,32);
+        this.outDoor.isStatic = true;
+
         //TaskBox
         this.scene.launch('InfoBoxScene');
         this.scene.bringToTop('InfoBoxScene');
         taskBox.clearTasks();
         taskBox.title = "Aufgaben";
-        taskBox.addTask('Durchsuche die Büros\nnach Informationen',false);
+        taskBox.addTask('Durchsuche das Gebäude\nnach Informationen',false);
         this.time.delayedCall(10,()=>{taskBox.updateTasks();});
         //Parameters
         this.canPerformAction = false;
@@ -265,9 +265,10 @@ export class Indoor extends Scene
                 if (highlight) {
                     // Destroy the highlight object
                     highlight.setVisible(false); 
-        
+                    
                     // Optionally, remove it from the array
                     this.highlightObjects[this.interActionID - 1] = null;
+                    this.allChecked();
                 }else{
                     console.log("No highlight found");
                 }
@@ -275,16 +276,17 @@ export class Indoor extends Scene
         }
     }
 
-    openResource(key : string){
-        const image = this.add.image(1024/2,768/2,key);
-        image.setScrollFactor(0);
-        image.setDepth(99);
-        image.setScale(1 / this.camera.zoom)
-        this.createCloseButton(image);
-        this.allContainersChecked[1] = true;
-        if(this.allContainersChecked.every(Boolean)){
+    allChecked(){
+        if(this.highlightObjects.every((obj: any) => obj === null)){
             taskBox.completeTask(0);
             this.addTask();
+            this.outDoor.isSensor = true;
+            this.outDoor.setOnCollideWith(this.player.getBody(), () =>{
+                this.scene.stop('InfoBoxScene');
+                this.registry.set('phase',2);
+                const nextScene = sceneManager.getNextScene();
+                this.scene.start(nextScene?.key,nextScene?.data);
+            })
         }
     }
 
@@ -412,8 +414,7 @@ export class Indoor extends Scene
             { x: 10, y: 12 },
             { x: 4, y: 12 },
             { x: 7, y: 10 },
-            { x: 4.9, y: 17.3 },
-            { x: 9, y: 23}
+            { x: 4.9, y: 17.3 }
         ]
 
         this.highlightObjects = [];

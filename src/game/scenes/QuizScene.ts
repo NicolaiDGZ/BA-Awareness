@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import { quizManager } from './components/QuizManager';
+import { sceneManager } from './components/SceneManager';
 
 export class QuizScene extends Scene {
     private currentQuestionIndex: number = 0;
@@ -23,6 +24,14 @@ export class QuizScene extends Scene {
 
     create() {
         this.cameras.main.setBackgroundColor('#001100');
+        this.add.text(100, 50, '> Quiz', {
+            fontFamily: 'Courier New',
+            fontSize: '36px',
+            color: '#00ff00',
+            wordWrap: { width: 700 },
+            stroke: '#003300',
+            strokeThickness: 2
+        });
         this.addQuestions();
         this.currentQuestionIndex = 0;
         this.setupQuestion();
@@ -30,19 +39,241 @@ export class QuizScene extends Scene {
     }
 
     private addQuestions() {
-        // Beispiel-Fragen für das Quiz
-        quizManager.addQuestion("Was ist Social Engineering?", [
-            "Versuch, Computer zu hacken",
-            "Manipulation von Menschen",
-            "Methode, Sicherheitskameras zu umgehen",
-            "Entwicklung von sozialen Medien"
-        ], 1, "Ein Social Engineer ist ein Manipulator");
-        quizManager.addQuestion("Welches Verhalten sollte vermieden werden?", [
-            "Dokumente wegwerfen",
-            "Passwörter aufschreiben",
-            "Gespräche in Öffentlichkeit vermeiden",
-            "Sicherheitsrichtlinien missachten"
-        ], [0,1], "Dokumente wegwerfen ist nichts schlimmes. Passwörter aufschreiben - böööse!");
+        // Fragen zu Mission 1
+        const phase = this.registry.get('phase') || 0;
+        if(phase == 1){
+            quizManager.addQuestion(
+                "Wie müssen 'streng vertrauliche' Dokumente entsorgt werden?",
+                [
+                    "A) Im Papiermüll, da Papier recycelt wird",
+                    "B) In der Datenschutztonne nach physischer Zerstörung",
+                    "C) Im Altpapier-Container, da er sicher ist",
+                    "D) Im normalen Büromüll, da niemand dort sucht"
+                ],
+                1, // Korrekte Antwort: B
+                "Falsch! Streng vertrauliche Dokumente müssen gesichert vernichtet werden, z. B. in der Datenschutztonne.",
+                "Richtig! Streng vertrauliche Dokumente gehören in die Datenschutztonne und müssen vorher zerstört werden."
+            );
+            quizManager.addQuestion(
+                "Welche der folgenden Maßnahmen schützen vor Datenlecks in öffentlichen Bereichen?",
+                [
+                    "A) Vertrauliche Gespräche in der Cafeteria führen",
+                    "B) Sichtschutzfilter für Laptops verwenden",
+                    "C) Dokumente und Geräte unbeaufsichtigt lassen",
+                    "D) Keine vertraulichen Informationen in Aufzügen besprechen"
+                ],
+                [1, 3], // Korrekte Antworten: B, D
+                "Falsch! Vertrauliche Gespräche in der Cafeteria und unbeaufsichtigte Dokumente sind ein Risiko.",
+                "Richtig! Sichtschutzfilter und das Vermeiden vertraulicher Gespräche in öffentlichen Bereichen schützen vor Datenlecks."
+            );
+            quizManager.addQuestion(
+                "Welche der folgenden Aussagen zur Datenentsorgung sind korrekt?",
+                [
+                    "A) formatierte digitale Speichermedien können im Restmüll entsorgt werden",
+                    "B) Dokumente ab Stufe 'intern' müssen gesichert vernichtet werden",
+                    "C) Papierdokumente mit Kundendaten gehören in die Datenschutztonne",
+                    "D) Nur Dokumente der Stufen 'vertraulich' und 'strenge vertraulich' müssen gesichert vernichtet werden"
+                ],
+                [1, 2], // Korrekte Antworten: B, C
+                "Falsch! Digitale Speichermedien und vertrauliche Daten müssen gesichert entsorgt werden.",
+                "Richtig! Dokumente ab Stufe 'intern' und digitale Speichermedien müssen gesichert vernichtet werden."
+            );
+            quizManager.addQuestion(
+                "Was ist/sind Beispiel(e) für einen 'öffentlichen Bereich'?",
+                [
+                    "A) Mein Einzelbüro",
+                    "B) Das unternehmenseigene Café",
+                    "C) Der Besprechungsraum",
+                    "D) Ein Sitz in der 1. Klasse der Bahn"
+                ],
+                [1,3], // Korrekte Antwort: B, c
+                "Falsch! Café und Bahn sind öffentliche Bereich, in dem vertrauliche Gespräche vermieden werden sollten.",
+                "Richtig! Café und Bahn sind öffentliche Bereiche – hier sollte man keine vertraulichen Gespräche führen."
+            );
+            quizManager.addQuestion(
+                "Was ist ein Beispiel für ein 'internes' Dokument?",
+                [
+                    "A) Ein öffentlicher Produktflyer",
+                    "B) Ein Kaufvertrag",
+                    "C) Ein Organigramm",
+                    "D) Kundendaten"
+                ],
+                2, // Korrekte Antwort: C
+                "Falsch! Ein Organigramm ist ein internes Dokument, das nur für Mitarbeiter bestimmt ist.",
+                "Richtig! Ein Organigramm ist ein internes Dokument und sollte nicht öffentlich zugänglich sein."
+            );
+            quizManager.addQuestion(
+                "Welche der folgenden Situationen sind in öffentlichen Bereichen riskant?",
+                [
+                    "A) Ein Gespräch über interne Projektkosten im Aufzug",
+                    "B) Die Nutzung eines Sichtschutzfilters am Laptop",
+                    "C) Ein unbeaufsichtigter Laptop in der Cafeteria",
+                    "D) Das Lesen öffentlicher News im Wartebereich"
+                ],
+                [0, 2], // Korrekte Antworten: A, C
+                "Falsch! Vertrauliche Gespräche in öffentlichen Bereichen und unbeaufsichtigte Geräte sind ein Risiko.",
+                "Richtig! Vertrauliche Gespräche in öffentlichen Bereichen und unbeaufsichtigte Geräte können zu Datenlecks führen."
+            );
+            quizManager.addQuestion(
+                "Was ist ein Social Engineer?",
+                [
+                    "A) Eine Person, die soziale Medien verwaltet",
+                    "B) Ein Hacker, der außschließlich technische Schwachstellen ausnutzt",
+                    "C) Eine Person, die menschliche Schwächen ausnutzt, um an Informationen zu gelangen",
+                    "D) Ein IT-Spezialist, der Firewalls konfiguriert"
+                ],
+                2, // Korrekte Antwort: C
+                "Falsch! Ein Social Engineer nutzt nicht nur technische Schwachstellen, sondern manipuliert Menschen, um an Informationen zu gelangen.",
+                "Richtig! Ein Social Engineer nutzt psychologische Tricks, um Menschen zu manipulieren und an vertrauliche Informationen zu kommen."
+            );
+            quizManager.addQuestion(
+                "Was sollte aufgrund der Informationssicherheit nicht in sozialen Netzwerken geteilt werden?",
+                [
+                    "A) Firmen-Ausflugsfotos mit Kollegen inlusive Namenschildern",
+                    "B) Vertrauliche Geschäftsinformationen",
+                    "C) Ein Link zu einem öffentlichen News-Artikel",
+                    "D) Urlaubsfotos"
+                ],
+                [0,1], // Korrekte Antwort: B
+                "Falsch! Vertrauliche Geschäftsinformationen sollten niemals in sozialen Netzwerken geteilt werden – sie könnten missbraucht werden.",
+                "Richtig! Vertrauliche Geschäftsinformationen gehören nicht in soziale Netzwerke, da sie ein Sicherheitsrisiko darstellen."
+            );
+        }else{
+            // Fragen zu Mission 2
+            quizManager.addQuestion(
+                "Welche Anzeichen deuten auf eine Phishing-E-Mail hin?",
+                [
+                    "A) Dringende Aufforderung zum Handeln",
+                    "B) Unerwartete Anhänge oder Links",
+                    "C) Absenderadresse mit Tippfehlern oder unbekannter Domain",
+                    "D) Perfekte Grammatik und professionelle Formulierung"
+                ],
+                [0, 1, 2], // Korrekte Antworten: A, B, C
+                "Falsch! Nicht jede gut geschriebene E-Mail ist sicher – prüfe die Absenderadresse und Anhänge!",
+                "Richtig! Phishing-Mails erzeugen Druck, enthalten verdächtige Anhänge und oft gefälschte Absender."
+            );
+            quizManager.addQuestion(
+                "Was ist eine Spear-Phishing-Attacke?",
+                [
+                    "A) Eine breit gestreute E-Mail-Kampagne",
+                    "B) Eine gezielte E-Mail an eine bestimmte Person oder Abteilung",
+                    "C) Eine Phishing-Mail mit persönlichem Bezug zum Empfänger",
+                    "D) Eine E-Mail von einem echten Unternehmen ohne Schadsoftware"
+                ],
+                [1, 2], // Korrekte Antworten: B, C
+                "Falsch! Spear-Phishing ist eine gezielte Attacke, oft mit persönlichem Bezug.",
+                "Richtig! Spear-Phishing ist ein gezielter Angriff auf Einzelpersonen oder Abteilungen mit gut recherchierten Informationen."
+            );
+            quizManager.addQuestion(
+                "Was sind sinvolle Maßnahmen, um sich und andere vor Phishing zu schützen?",
+                [
+                    "A) Unbekannte Links oder Anhänge nicht öffnen",
+                    "B) Absenderadresse und Schreibweise genau prüfen",
+                    "C) Mails von außerhalb des Unternehmens ignorieren",
+                    "D) Verdächtige E-Mails über den Phishing-Melde-Button melden"
+                ],
+                [0, 1, 3], // Korrekte Antworten: A, B, D
+                "Falsch! Automatische Antworten können dich anfälliger für weitere Angriffe machen.",
+                "Richtig! Vorsicht bei Anhängen, Absenderprüfung und Melden verdächtiger E-Mails sind essenzielle Schutzmaßnahmen."
+            );
+            quizManager.addQuestion(
+                "Welche Faktoren stärken die Sicherheit eines Passworts?",
+                [
+                    "A) hohe Anzahl an Zeichen (>14)",
+                    "B) Kombination aus Groß- und Kleinbuchstaben, Zahlen und Sonderzeichen",
+                    "C) leiche Einprägsamkeit durch Verwendung des eigenen Namens",
+                    "D) mehrfache Verwendung auf verschiedenen Websites"
+                ],
+                [0, 1], // Korrekte Antworten: A, B, D
+                "Falsch! Ein sicheres Passwort sollte lang, komplex und nicht einfach zu erraten sein.",
+                "Richtig! Länge, Komplexität und Passphrasen sind wichtige Elemente sicherer Passwörter."
+            );
+            quizManager.addQuestion(
+                "Was solltest du tun, wenn du dein Passwort aufschreiben musst?",
+                [
+                    "A) Es in einem Texdokument aufschreiben",
+                    "B) Es in einem Passwortmanager speichern",
+                    "C) Es in meinem Tagebuch notieren",
+                    "D) Es unter die Tastatur kleben"
+                ],
+                [1], // Korrekte Antwort: B
+                "Falsch! Passwörter sollten niemals offen oder ungesichert aufbewahrt werden.",
+                "Richtig! Ein Passwortmanager bietet eine sichere Möglichkeit, Passwörter zu speichern."
+            );
+            quizManager.addQuestion(
+                "Was ist ein Keylogger?",
+                [
+                    "A) Ein Tool, das Tastatureingaben aufzeichnet",
+                    "B) Ein Sicherheitssystem für Bürogebäude",
+                    "C) Ein Programm zur Verschlüsselung von Passwörtern",
+                    "D) Eine Methode zum Schutz vor Phishing-Angriffen"
+                ],
+                [0], // Korrekte Antwort: A
+                "Falsch! Ein Keylogger zeichnet Tastatureingaben auf und wird oft für Cyberangriffe genutzt.",
+                "Richtig! Keylogger protokollieren Eingaben und können sensible Daten stehlen."
+            );
+            quizManager.addQuestion(
+                "Welche der folgenden Verhaltensweisen erhöhen die Sicherheit am Arbeitsplatz?",
+                [
+                    "A) Bildschirmsperre aktivieren, wenn du den Arbeitsplatz verlässt",
+                    "B) Fremde Personen ins Gebäude lassen, wenn sie einen guten Grund haben",
+                    "C) USB-Sticks aus unbekannten Quellen verwenden",
+                    "D) Sicherheitsbewusstsein durch regelmäßige Schulungen stärken"
+                ],
+                [0, 3], // Korrekte Antworten: A, D
+                "Falsch! Unbekannte USB-Sticks und unkontrollierter Zugang sind große Sicherheitsrisiken.",
+                "Richtig! Bildschirmsperren und Sicherheitsbewusstsein sind essenziell für den Schutz sensibler Daten."
+            );
+            quizManager.addQuestion(
+                "Welche Sicherheitsmaßnahmen helfen gegen Business-Email-Compromise-Angriffe?",
+                [
+                    "A) Bestätigung wichtiger Anfragen über einen zweiten Kanal",
+                    "B) Klick auf alle Links in E-Mails, um deren Sicherheit zu prüfen",
+                    "C) Überprüfen, ob die Absenderadresse korrekt ist",
+                    "D) Weiterleitung verdächtiger E-Mails an die IT-Sicherheitsabteilung"
+                ],
+                [0, 3], // Korrekte Antworten: A, C, D
+                "Falsch! Unüberlegtes Klicken auf Links kann gefährlich sein – prüfe immer die Echtheit.",
+                "Richtig! Doppelte Bestätigung & Meldung an die IT helfen, Business-Email-Compromise-Angriffe zu verhindern."
+            );
+            quizManager.addQuestion(
+                "Welche der folgenden Situationen könnten Social Engineering sein? (Mehrere Antworten möglich)",
+                [
+                    "A) Ein Anruf von der IT-Abteilung, der nach deinem Passwort fragt.",
+                    "B) Eine E-Mail, die dich auffordert, auf einen Link zu klicken.",
+                    "C) Ein neuer Kollege, der dich um Hilfe",
+                    "D) Eine Nachricht in einem sozialen Netzwerk, die nach persönlichen Daten fragt."
+                ],
+                [0, 1, 2, 3], // Korrekte Antworten: A, B, D
+                "Falsch! Alle diese Situationen könten potentiell gefährlich sein.",
+                "Richtig! Social Engineers können alle Formen der Kommunikation nutzen, um dich zu manipulieren."
+            );
+            quizManager.addQuestion(
+                "Was ist ein Ziel der Clean-Desk-Policy?",
+                [
+                    "A) Den Arbeitsplatz ästhetisch ansprechend zu gestalten.",
+                    "B) Vertrauliche Informationen vor unbefugtem Zugriff zu schützen.",
+                    "C) Die Nutzung von Papierdokumenten zu reduzieren.",
+                    "D) Die Anzahl der Schreibtische im Büro zu verringern."
+                ],
+                1, // Korrekte Antwort: B
+                "Falsch! Die Clean-Desk-Policy soll vertrauliche Informationen vor unbefugtem Zugriff schützen.",
+                "Richtig! Die Clean-Desk-Policy sorgt dafür, dass vertrauliche Informationen nicht offen herumliegen."
+            );
+            quizManager.addQuestion(
+                "Was ist Tailgatin?",
+                [
+                    "A) Das unbefugte Mitgehen durch eine Tür oder Vereinzelungsanlage",
+                    "B) Ein Programm, welches Tastatureingaben abfängt und an den Angreifer weiterleitet",
+                    "C) Das Vortäuschen einer dem Opfer bekannten Person über Email",
+                    "D) Die Informationsbeschaffung im Vorfeld eines Social-Engineering-Angriffs"
+                ],
+                0, // Korrekte Antwort: A
+                "Falsch! Tailgating bedeutet, dass eine unbefugte Person durch eine Tür geht, die von jemand anderem geöffnet wurde.",
+                "Richtig! Tailgating ist das unbefugte Mitgehen durch eine Tür, z. B. aus Höflichkeit."
+            );
+        }
+        
     }
 
     private setupKeyboardControls() {
@@ -98,7 +329,7 @@ export class QuizScene extends Scene {
 
     private displayQuestion() {
         const question = quizManager.getQuestion(this.currentQuestionIndex);
-        this.questionText = this.add.text(100, 50, '> ' + question, {
+        this.questionText = this.add.text(100, 150, '> ' + question, {
             fontFamily: 'Courier New',
             fontSize: '24px',
             color: '#00ff00',
@@ -112,15 +343,16 @@ export class QuizScene extends Scene {
         const options = quizManager.getOptions(this.currentQuestionIndex);
         this.selectedAnswers = new Array(options.length).fill(false);
 
-        let yPosition = 150;
+        let yPosition = 250;
         options.forEach((option, index) => {
-            const optionText = this.add.text(100, yPosition, `[${index + 1}] ${option}`, {
+            const optionText = this.add.text(120, yPosition, `[${index + 1}] ${option}`, {
                 fontFamily: 'Courier New',
                 fontSize: '20px',
                 color: '#00ff00',
                 stroke: '#003300',
                 strokeThickness: 2,
-                padding: { x: 10, y: 5 }
+                padding: { x: 10, y: 5 },
+                wordWrap: { width: 800, useAdvancedWrap: true}
             })
             .setInteractive()
             .on('pointerdown', () => this.toggleOption(index))
@@ -139,7 +371,7 @@ export class QuizScene extends Scene {
     }
 
     private createSubmitButton() {
-        this.submitButton = this.add.text(100, 400, '> SUBMIT', {
+        this.submitButton = this.add.text(100, 600, '> SUBMIT', {
             fontFamily: 'Courier New',
             fontSize: '24px',
             color: '#00ff00',
@@ -281,9 +513,7 @@ export class QuizScene extends Scene {
         quizManager.reset();
         this.currentQuestionIndex = 0;
         
-        this.scene.start('InfoScreen', {
-            title: 'Rückblick',
-            message: 'In dieser Mission haben wir wichtige Lektionen über die Informationssicherheit gelernt:\n\n> Auch scheinbar unwichtige Informationen können von Angreifern oder Social Engineers genutzt werden, um Schaden anzurichten.\n\n> Mitarbeiter sollten daher sorgsam achten, welche Informationen sie wie entsorgen.\n\n> Sensible Informationen dürfen nicht in der öffentlichkeit besprochen werden, um potenzielle Abhörversuche vorzubeugen.\n\nWeitere Informationen finden Sie im E-Learning zur Informationssicherheit.',
-            scene: '#InfoScreen'});
+        const nextScene = sceneManager.getNextScene();
+        this.scene.start(nextScene?.key, nextScene?.data);
     }
 }

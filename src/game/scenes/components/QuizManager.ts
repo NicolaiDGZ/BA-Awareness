@@ -42,9 +42,10 @@ class QuizManager {
     isAnswerCorrect(index: number): boolean {
         const correctAnswers = this.questions[index].correctAnswers;
         const userAnswers = this.userAnswers[index];
-
+        const correct = correctAnswers.every(answerIndex => userAnswers[answerIndex]) &&
+                userAnswers.every((selected, idx) => correctAnswers.includes(idx) === selected);
         // Überprüft, ob die Antworten übereinstimmen
-        return correctAnswers.every(answerIndex => userAnswers[answerIndex]);
+        return correct;
     }
 
     calculateScore(): number {

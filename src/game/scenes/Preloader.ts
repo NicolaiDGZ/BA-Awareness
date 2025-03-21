@@ -33,12 +33,14 @@ export class Preloader extends Scene
         this.load.setPath('assets');
 
         this.load.image('cv', 'cv.png');
+        this.load.image('notesVisitorPass', 'notesVisitorPass.png');
         this.load.image('visitor_pass', 'visitor_pass.png');
         this.load.image('closeButton', 'closeButton.png');
         this.load.image('worker1', 'worker1.png');
         this.load.image('worker2', 'worker2.png');
         this.load.image('bouncer', 'bouncer.png');
         this.load.image('desk', 'desk.png');
+        this.load.image('socialMediaPost','socialMediaPost.png');
         this.load.image('learnings', 'learnings.png');
         this.load.image('backgroundImage','ui/backgroundImage.png')
         this.load.image('tasks','ui/tasks.png')
@@ -46,6 +48,7 @@ export class Preloader extends Scene
         this.load.image('cb_true','ui/checkbox_true.png');
         this.load.image('nothingtofind','ui/nothingtofind.png');
         this.load.image('controls','ui/Controls.png');
+        this.load.image('scanlines','scanlines.jpg');
 
         // Tilesets
         this.load.setPath('assets/tileSets');
@@ -90,6 +93,19 @@ export class Preloader extends Scene
         this.load.image('organigramm','organigramm.png');
         this.load.image('crossword','crossword.png');
         this.load.image('summerparty','summerparty.png');
+
+        //Vehicles
+        this.load.setPath('assets/vehicles');
+        this.load.image('v_ambulance','v_ambulance.png');
+        this.load.image('v_blueCar','v_blueCar.png');
+        this.load.image('v_brownBus','v_brownBus.png');
+        this.load.image('v_camper','v_camper.png');
+        this.load.image('v_copperCar','v_copperCar.png');
+        this.load.image('v_greenCar','v_greenCar.png');
+        this.load.image('v_orangeCar','v_orangeCar.png');
+        this.load.image('v_redCar','v_redCar.png');
+        this.load.image('v_yellowBus','v_yellowBus.png');
+
 
         // TileMaps
         this.load.setPath('assets/tileMaps');

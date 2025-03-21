@@ -13,6 +13,8 @@ import { RecapScene } from './scenes/RecapScene.ts';
 import { Indoor } from './scenes/Indoor.ts';
 import { PopupScene } from './scenes/PopupScene.ts';
 import { SpearPhishingScene } from './scenes/SpearPhishingScene.ts';
+import { FreeTextScene } from './scenes/FreeTextScene.ts';
+import { MailLoginScene } from './scenes/MailLoginScene.ts';
 
 
 //  Find out more information about the Game Config at:
@@ -38,7 +40,9 @@ const config: Phaser.Types.Core.GameConfig = {
         QuizScene,
         InfoScreen,
         PopupScene,
-        SpearPhishingScene
+        SpearPhishingScene,
+        FreeTextScene,
+        MailLoginScene
     ],
     physics: {
         default: 'matter',
