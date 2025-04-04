@@ -3,6 +3,7 @@ import { Scene } from 'phaser';
 
 export class Player {
     private sprite: Phaser.Physics.Matter.Sprite;
+    private wasdKeys: { up: Phaser.Input.Keyboard.Key, down: Phaser.Input.Keyboard.Key, left: Phaser.Input.Keyboard.Key, right: Phaser.Input.Keyboard.Key };
     private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     private movementSpeed: number;
     private idleTimer: number = 0;
@@ -24,6 +25,12 @@ export class Player {
         
         // Keyboard input
         this.cursors = scene.input.keyboard!.createCursorKeys();
+        this.wasdKeys = {
+            up: scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+            down: scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+            left: scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+            right: scene.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+        };
         // Load animations
         this.loadAnimations(scene);
     }
@@ -71,22 +78,22 @@ export class Player {
         let isMoving = false;
 
         // Handle X-axis movement
-        if (this.cursors.left.isDown && !this.cursors.up.isDown && !this.cursors.down.isDown) {
+        if ((this.cursors.left.isDown || this.wasdKeys.left.isDown) && !(this.cursors.up.isDown || this.wasdKeys.up.isDown) && !(this.cursors.down.isDown || this.wasdKeys.down.isDown)) {
             velocityX = -this.movementSpeed;
             this.sprite.anims.play('left', true);
             isMoving = true;
-        } else if (this.cursors.right.isDown && !this.cursors.up.isDown && !this.cursors.down.isDown) {
+        } else if ((this.cursors.right.isDown || this.wasdKeys.right.isDown) && !(this.cursors.up.isDown || this.wasdKeys.up.isDown) && !(this.cursors.down.isDown || this.wasdKeys.down.isDown)) {
             velocityX = this.movementSpeed;
             this.sprite.anims.play('right', true);
             isMoving = true;
         }
 
         // Handle Y-axis movement
-        if (this.cursors.up.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown) {
+        if ((this.cursors.up.isDown || this.wasdKeys.up.isDown) && !(this.cursors.left.isDown || this.wasdKeys.left.isDown) && !(this.cursors.right.isDown || this.wasdKeys.right.isDown)) {
             velocityY = -this.movementSpeed;
             this.sprite.anims.play('up', true);
             isMoving = true;
-        } else if (this.cursors.down.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown) {
+        } else if ((this.cursors.down.isDown || this.wasdKeys.down.isDown) && !(this.cursors.left.isDown || this.wasdKeys.left.isDown) && !(this.cursors.right.isDown || this.wasdKeys.right.isDown)) {
             velocityY = this.movementSpeed;
             this.sprite.anims.play('down', true);
             isMoving = true;

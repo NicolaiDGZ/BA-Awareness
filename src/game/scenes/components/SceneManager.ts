@@ -8,7 +8,12 @@ class SceneManager {
     getNextScene() {
         console.log('Scenes left:' + this.sceneQueue.map(scene => scene.key).join(", "));
         console.log("Switching scene to: " + this.sceneQueue.at(0)?.key);
-        return this.sceneQueue.shift(); // Nimmt das erste Element und entfernt es aus der Warteschlange
+        if(this.hasNextScene()){
+            return this.sceneQueue.shift(); // Nimmt das erste Element und entfernt es aus der Warteschlange
+        }else{
+            return { key : 'MainMenu', data: null };
+        }
+        
     }
 
     hasNextScene() {

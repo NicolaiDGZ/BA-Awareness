@@ -3,6 +3,7 @@ import { taskBox } from './components/taskBox';
 import Bot from './components/Bot';
 import Player from './components/Player';
 import { sceneManager } from './components/SceneManager';
+import { AchievementManager } from './components/AchievementManager';
 
 export class Game extends Scene
 {
@@ -24,7 +25,7 @@ export class Game extends Scene
     secondStage: boolean;
     bot: Bot;
     bot1: Bot;
-    canCreateSpeachBubble: boolean;
+    canCreateSpeechBubble: boolean;
 
     constructor ()
     {
@@ -69,12 +70,12 @@ export class Game extends Scene
             taskBox.addTask('Durchsuche die Müllcontainer\nnach Informationen',false);
             taskBox.addTask('Belausche die Mitarbeiter',false);
         }else if(phase == 2){
-            taskBox.addTask('Kehre zu deinem Bus zurück',false);
+            taskBox.addTask('Gehe zurück zu deinem Bus und nutze die gesammelten Informationen',false);
         }
         this.time.delayedCall(500,()=>{taskBox.updateTasks();});
         //Parameters
         this.canPerformAction = false;
-        this.canCreateSpeachBubble = true;
+        this.canCreateSpeechBubble = true;
         this.interActionID = 0;
         this.interActionKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.inArea = false;
@@ -216,6 +217,21 @@ export class Game extends Scene
                 this.infoText.setVisible(false);
                 this.interActionID = 0;
             } 
+
+            //Garbage bin
+            const binArea = this.matter.add.rectangle(7.5*32,36.5*32,3*32,3*32);
+            binArea.isStatic = true;
+            binArea.isSensor = true;
+            binArea.setOnCollideWith(this.player.getBody(), () => {
+                this.canPerformAction = true;
+                this.time.delayedCall(3000,this.showActionText.bind(this));
+                this.interActionID = 6;
+            });
+            binArea.onCollideEndCallback = () => { 
+                this.canPerformAction = false;
+                this.infoText.setVisible(false);
+                this.interActionID = 0;
+            }
         }else if(phase == 1){
             
         }else if(phase == 2){
@@ -247,7 +263,21 @@ export class Game extends Scene
             this.canPerformAction = false;
             this.infoText.setVisible(false);
             this.interActionID = 0;
-         }
+         } 
+         //swing
+         const swingArea = this.matter.add.rectangle(55.5*32,4.5*32,5*32,3*32);
+         swingArea.isStatic = true;
+         swingArea.isSensor = true;
+         swingArea.setOnCollideWith(this.player.getBody(), () => {
+             this.canPerformAction = true;
+             this.time.delayedCall(3000,this.showActionText.bind(this));
+             this.interActionID = 7;
+         });
+         swingArea.onCollideEndCallback = () => { 
+             this.canPerformAction = false;
+             this.infoText.setVisible(false);
+             this.interActionID = 0;
+         } 
     }
 
     /**
@@ -263,8 +293,8 @@ export class Game extends Scene
      * @returns void This method does not return a value.
      */
     createConversation() {
-        if(this.inArea && this.canCreateSpeachBubble){
-            this.canCreateSpeachBubble = false;
+        if(this.inArea && this.canCreateSpeechBubble){
+            this.canCreateSpeechBubble = false;
             this.createSpeechBubble(28*32-20,34*32-150,300,100,"Hast du schon mitbekommen, dass wir einen neuen Mitarbeiter bekommen?",3000);
             this.time.delayedCall(3100,() => {this.createSpeechBubble(28*32+75,34*32-150,150,100,"Nein, ab wann denn?",3000);});
             this.time.delayedCall(3100*2,() => {this.createSpeechBubble(28*32-10,34*32-150,150,100,"Schon ab Montag",3000);});
@@ -385,7 +415,7 @@ export class Game extends Scene
                                 text.setVisible(false);
                                 text.destroy();
                             });
-                        }else
+                        }
                         break;
                     }
                     case 5:{
@@ -397,8 +427,21 @@ export class Game extends Scene
                             this.scene.start(nextScene?.key,nextScene?.data);
                         }
                         else{
-                            this.createSpeechBubble(19*32,26*32,450,100,'Sorry, um hier reinzukommen, brauchst du einen \nMitarbeiter oder Gästeausweis.',5000);
+                            this.createSpeechBubble(19*32,26*32,450,100,'Stop, um hier reinzukommen, brauchst du einen \nMitarbeiter oder Gästeausweis.',5000);
                         }
+                        break;
+                    }
+                    case 6:{
+                        //Garbage bin
+                        this.createSpeechBubble(8*32,30*32,450,100,'Hier scheint nur Müll zu sein. \nVielleicht da oben bei den großen Containern?',5000, this.player.getSprite())
+                        break;
+                    }
+                    case 7:{
+                        //Garbage bin
+                        this.createSpeechBubble(44*32,0.2*32,300,100,'Why did Jackie Chan bring a swing to the movie set?',3900, this.player.getSprite());
+                        this.time.delayedCall(4000,() => this.createSpeechBubble(44*32,0.2*32,400,100,'Because he wanted to take his action scenes to new heights\n but ended up just swinging by for a laugh!',4900, this.player.getSprite()));
+
+                        this.time.delayedCall(9500, () => AchievementManager.unlockAchievement("joke", this));
                         break;
                     }
                     default:{
@@ -504,7 +547,7 @@ export class Game extends Scene
 
     loadUI(){
         //Infotext for Interaction
-        this.infoText = this.add.text(1024/2, 768-50, 'Drücke die Leertaste zum Interagieren', { font: '24px Arial', color: '#fff' });
+        this.infoText = this.add.text(1024/2, 768-50, 'Drücke die Leertaste zum Interagieren.', { font: '24px Arial', color: '#fff' });
         this.infoText.setVisible(false);
         this.infoText.setScrollFactor(0);
         this.infoText.setOrigin(0.5,0.5);
@@ -520,7 +563,7 @@ export class Game extends Scene
         });
     }
 
-    createSpeechBubble (x: number, y: number, width: number, height: number, quote: string, destroyTime: number)
+    createSpeechBubble (x: number, y: number, width: number, height: number, quote: string, destroyTime: number, target: Phaser.GameObjects.Sprite | undefined = undefined)
     {
         var bubbleWidth = width;
         var bubbleHeight = height;
@@ -569,8 +612,20 @@ export class Game extends Scene
 
         bubble.setDepth(101);
         content.setDepth(101);
-
         this.time.delayedCall(destroyTime,()=>{content.setVisible(false);content.destroy;bubble.setVisible(false);bubble.destroy;})
+
+        if(target != undefined){
+            this.time.addEvent({
+                delay: 10, // this will run in the next frame
+                loop: true,
+                callback: () => {
+                    // Follow the target's position
+                    bubble.setPosition(target.x, target.y - target.height / 1.5 - bubbleHeight); // Adjust as needed
+                    content.setPosition(bubble.x + (bubbleWidth / 2) - (b.width / 2), bubble.y + (bubbleHeight / 2) - (b.height / 2));
+                }
+            });
+        }
+        
     }
 
     spawnCar() {

@@ -1,15 +1,26 @@
 import { Scene } from 'phaser';
 import { quizManager } from './components/QuizManager';
 import { sceneManager } from './components/SceneManager';
+import { AchievementManager } from './components/AchievementManager';
 
 export class QuizScene extends Scene {
     private currentQuestionIndex: number = 0;
     private selectedAnswers: boolean[] = [];
+    private progressBar!: Phaser.GameObjects.Graphics;
     private questionText!: Phaser.GameObjects.Text;
     private optionElements: Phaser.GameObjects.Text[] = [];
     private submitButton!: Phaser.GameObjects.Text;
     private infoText!: Phaser.GameObjects.Text;
     private continueButton!: Phaser.GameObjects.Text;
+    //Score
+    private score: number;
+    private scoreText!: Phaser.GameObjects.Text;
+    private combo: number;
+    //Timer
+    private timeLeft: number = 150;
+    private totalTime: number = 150;
+    private timerGraphics!: Phaser.GameObjects.Graphics;
+    private timerEvent!: Phaser.Time.TimerEvent | null;
     //Keys
     private key1!: Phaser.Input.Keyboard.Key;
     private key2!: Phaser.Input.Keyboard.Key;
@@ -17,14 +28,27 @@ export class QuizScene extends Scene {
     private key4!: Phaser.Input.Keyboard.Key;
     private enterKey!: Phaser.Input.Keyboard.Key;
     continueText: import("phaser").GameObjects.Text;
+    questionIndexText: import("phaser").GameObjects.Text;
 
     constructor() {
         super({ key: 'QuizScene' });
     }
 
     create() {
+        this.score = 0;
+        this.combo = 1;
+        this.scoreText = this.add.text(900, 100, '0', {
+            fontFamily: 'Courier New',
+            fontSize: '24px',
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+        //Timer
+        this.timerGraphics = this.add.graphics();
+        this.startTimer();
         this.cameras.main.setBackgroundColor('#001100');
-        this.add.text(100, 50, '> Quiz', {
+        this.add.text(100, 40, '> Quiz', {
             fontFamily: 'Courier New',
             fontSize: '36px',
             color: '#00ff00',
@@ -32,10 +56,94 @@ export class QuizScene extends Scene {
             stroke: '#003300',
             strokeThickness: 2
         });
+        
         this.addQuestions();
+
         this.currentQuestionIndex = 0;
         this.setupQuestion();
         this.setupKeyboardControls();
+        this.createProgressBar();
+    }
+
+    private startTimer() {
+        this.timeLeft = this.totalTime; // Zeit zurücksetzen
+        this.updateCircularTimer(); // Neu zeichnen
+    
+        if (this.timerEvent) {
+            this.timerEvent.remove(); // Falls ein alter Timer existiert, stoppen
+        }
+    
+        this.timerEvent = this.time.addEvent({
+            delay: 100,
+            callback: this.updateTimer,
+            callbackScope: this,
+            loop: true
+        });
+    }
+
+    private stopTimer() {
+        if (this.timerEvent) {
+            this.timerEvent.remove(); // Timer-Event stoppen
+            this.timerEvent = null;
+        }
+    }
+    
+    private updateTimer() {
+        if (this.timeLeft > 0) {
+            this.timeLeft--;
+            this.updateCircularTimer(); // Timer visuell updaten
+        }
+    }
+
+    private updateCircularTimer() {
+        this.timerGraphics.clear(); // Vorherigen Kreis löschen
+    
+        const centerX = 900; // X-Position des Kreises
+        const centerY = 100; // Y-Position des Kreises
+        const radius = 40; // Radius des Kreises
+        const startAngle = Phaser.Math.DegToRad(270); // Oben als Startpunkt
+        const endAngle = startAngle + Phaser.Math.DegToRad((this.timeLeft / this.totalTime) * 360);
+    
+        // Hintergrundkreis (leerer Timer)
+        this.timerGraphics.lineStyle(8, 0x003300, 1);
+        this.timerGraphics.strokeCircle(centerX, centerY, radius);
+    
+        // Fortschrittsbogen
+        this.timerGraphics.lineStyle(8, 0x00ff00, 1);
+        if(this.timeLeft < 50) this.timerGraphics.lineStyle(8, 0xffff00, 1);
+        if(this.timeLeft < 20) this.timerGraphics.lineStyle(8, 0xff0000, 1);
+        this.timerGraphics.beginPath();
+        this.timerGraphics.arc(centerX, centerY, radius, startAngle, endAngle, false);
+        this.timerGraphics.strokePath();
+    }
+
+    private createProgressBar() {
+        this.progressBar = this.add.graphics();
+        this.questionIndexText = this.add.text(512, 750, `${this.currentQuestionIndex + 1} / ${quizManager.getTotalQuestions()}`, {
+            fontFamily: 'Courier New',
+            fontSize: '20px',
+            color: '#00ff00',
+            stroke: '#003300',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+        this.updateProgressBar(); // Initiale Anzeige
+    }
+    private updateProgressBar() {
+        const totalQuestions = quizManager.getTotalQuestions();
+        const progress = (this.currentQuestionIndex) / (totalQuestions); // Berechnung des Fortschritts
+
+        this.progressBar.clear();
+        this.progressBar.fillStyle(0x003300, 1);
+        this.progressBar.fillRect(512-300, 700, 600, 20); // Hintergrund der Leiste
+
+        this.progressBar.fillStyle(0x00ff00, 1);
+        this.progressBar.fillRect(512-300, 700, 600 * progress, 20); // Fortschritt zeichnen
+
+        this.progressBar.lineStyle(3, 0x00ff00, 1);
+        const spacing = 8;
+        this.progressBar.strokeRect(512 - 300 - spacing, 700 - spacing, 600 + spacing*2, 20 + spacing*2);
+        
+        this.questionIndexText.text = `${this.currentQuestionIndex + 1} / ${quizManager.getTotalQuestions()}`;
     }
 
     private addQuestions() {
@@ -45,10 +153,10 @@ export class QuizScene extends Scene {
             quizManager.addQuestion(
                 "Wie müssen 'streng vertrauliche' Dokumente entsorgt werden?",
                 [
-                    "A) Im Papiermüll, da Papier recycelt wird",
-                    "B) In der Datenschutztonne nach physischer Zerstörung",
-                    "C) Im Altpapier-Container, da er sicher ist",
-                    "D) Im normalen Büromüll, da niemand dort sucht"
+                    "Im Papiermüll, da Papier recycelt wird",
+                    "In der Datenschutztonne",
+                    "Im abschließbaren Altpapier-Container",
+                    "Im Büromüll, der von einer seriösen Putzfirma geleert wird"
                 ],
                 1, // Korrekte Antwort: B
                 "Falsch! Streng vertrauliche Dokumente müssen gesichert vernichtet werden, z. B. in der Datenschutztonne.",
@@ -57,22 +165,22 @@ export class QuizScene extends Scene {
             quizManager.addQuestion(
                 "Welche der folgenden Maßnahmen schützen vor Datenlecks in öffentlichen Bereichen?",
                 [
-                    "A) Vertrauliche Gespräche in der Cafeteria führen",
-                    "B) Sichtschutzfilter für Laptops verwenden",
-                    "C) Dokumente und Geräte unbeaufsichtigt lassen",
-                    "D) Keine vertraulichen Informationen in Aufzügen besprechen"
+                    "Vertrauliche Gespräche führen, wenn ausschließlich Kollegen in Hörweite sind",
+                    "Sichtschutzfilter für Laptops verwenden",
+                    "Dokumente und Geräte unbeaufsichtigt lassen",
+                    "Keine vertraulichen Informationen in vollen Aufzügen besprechen"
                 ],
                 [1, 3], // Korrekte Antworten: B, D
-                "Falsch! Vertrauliche Gespräche in der Cafeteria und unbeaufsichtigte Dokumente sind ein Risiko.",
+                "Falsch! Vertrauliche Gespräche in Hörweite von anderen und unbeaufsichtigte Dokumente sind ein Risiko. Nicht alle Kollegen sind für alle Informationswerte freigegeben.",
                 "Richtig! Sichtschutzfilter und das Vermeiden vertraulicher Gespräche in öffentlichen Bereichen schützen vor Datenlecks."
             );
             quizManager.addQuestion(
                 "Welche der folgenden Aussagen zur Datenentsorgung sind korrekt?",
                 [
-                    "A) formatierte digitale Speichermedien können im Restmüll entsorgt werden",
-                    "B) Dokumente ab Stufe 'intern' müssen gesichert vernichtet werden",
-                    "C) Papierdokumente mit Kundendaten gehören in die Datenschutztonne",
-                    "D) Nur Dokumente der Stufen 'vertraulich' und 'strenge vertraulich' müssen gesichert vernichtet werden"
+                    "Formatierte digitale Speichermedien können im Restmüll entsorgt werden",
+                    "Dokumente ab Stufe 'intern' müssen gesichert vernichtet werden",
+                    "Papierdokumente mit Kundendaten gehören in die Datenschutztonne",
+                    "Nur Dokumente der Stufen 'vertraulich' und 'streng vertraulich' müssen gesichert vernichtet werden"
                 ],
                 [1, 2], // Korrekte Antworten: B, C
                 "Falsch! Digitale Speichermedien und vertrauliche Daten müssen gesichert entsorgt werden.",
@@ -81,10 +189,10 @@ export class QuizScene extends Scene {
             quizManager.addQuestion(
                 "Was ist/sind Beispiel(e) für einen 'öffentlichen Bereich'?",
                 [
-                    "A) Mein Einzelbüro",
-                    "B) Das unternehmenseigene Café",
-                    "C) Der Besprechungsraum",
-                    "D) Ein Sitz in der 1. Klasse der Bahn"
+                    "Mein Einzelbüro",
+                    "Das unternehmenseigene Café",
+                    "Der Besprechungsraum",
+                    "Ein Sitz in der 1. Klasse der Bahn"
                 ],
                 [1,3], // Korrekte Antwort: B, c
                 "Falsch! Café und Bahn sind öffentliche Bereich, in dem vertrauliche Gespräche vermieden werden sollten.",
@@ -93,49 +201,37 @@ export class QuizScene extends Scene {
             quizManager.addQuestion(
                 "Was ist ein Beispiel für ein 'internes' Dokument?",
                 [
-                    "A) Ein öffentlicher Produktflyer",
-                    "B) Ein Kaufvertrag",
-                    "C) Ein Organigramm",
-                    "D) Kundendaten"
+                    "Ein öffentlicher Produktflyer",
+                    "Ein Kaufvertrag",
+                    "Ein Organigramm",
+                    "Kundendaten"
                 ],
                 2, // Korrekte Antwort: C
-                "Falsch! Ein Organigramm ist ein internes Dokument, das nur für Mitarbeiter bestimmt ist.",
+                "Falsch! Nur das Organigramm ist ein internes Dokument, der Produktflyer ist 'öffentlich' und Kaufverträge oder Kundendaten sind 'vertraulich' oder sogar 'streng vertraulich'",
                 "Richtig! Ein Organigramm ist ein internes Dokument und sollte nicht öffentlich zugänglich sein."
-            );
-            quizManager.addQuestion(
-                "Welche der folgenden Situationen sind in öffentlichen Bereichen riskant?",
-                [
-                    "A) Ein Gespräch über interne Projektkosten im Aufzug",
-                    "B) Die Nutzung eines Sichtschutzfilters am Laptop",
-                    "C) Ein unbeaufsichtigter Laptop in der Cafeteria",
-                    "D) Das Lesen öffentlicher News im Wartebereich"
-                ],
-                [0, 2], // Korrekte Antworten: A, C
-                "Falsch! Vertrauliche Gespräche in öffentlichen Bereichen und unbeaufsichtigte Geräte sind ein Risiko.",
-                "Richtig! Vertrauliche Gespräche in öffentlichen Bereichen und unbeaufsichtigte Geräte können zu Datenlecks führen."
             );
             quizManager.addQuestion(
                 "Was ist ein Social Engineer?",
                 [
-                    "A) Eine Person, die soziale Medien verwaltet",
-                    "B) Ein Hacker, der außschließlich technische Schwachstellen ausnutzt",
-                    "C) Eine Person, die menschliche Schwächen ausnutzt, um an Informationen zu gelangen",
-                    "D) Ein IT-Spezialist, der Firewalls konfiguriert"
+                    "Eine Person, die soziale Medien verwaltet",
+                    "Ein Hacker, der ausschließlich technische Schwachstellen ausnutzt",
+                    "Eine Person, die menschliche Eigentschaften ausnutzt, um an Informationen zu gelangen",
+                    "Ein IT-Spezialist, der Firewalls konfiguriert"
                 ],
                 2, // Korrekte Antwort: C
-                "Falsch! Ein Social Engineer nutzt nicht nur technische Schwachstellen, sondern manipuliert Menschen, um an Informationen zu gelangen.",
+                "Falsch! Ein Social Engineer nutzt nicht NUR technische Schwachstellen, sondern manipuliert Menschen, um an Informationen zu gelangen.",
                 "Richtig! Ein Social Engineer nutzt psychologische Tricks, um Menschen zu manipulieren und an vertrauliche Informationen zu kommen."
             );
             quizManager.addQuestion(
                 "Was sollte aufgrund der Informationssicherheit nicht in sozialen Netzwerken geteilt werden?",
                 [
-                    "A) Firmen-Ausflugsfotos mit Kollegen inlusive Namenschildern",
-                    "B) Vertrauliche Geschäftsinformationen",
-                    "C) Ein Link zu einem öffentlichen News-Artikel",
-                    "D) Urlaubsfotos"
+                    "Firmen-Ausflugsfotos mit Kollegen inklusive Namenschildern",
+                    "Vertrauliche Geschäftsinformationen",
+                    "Ein Link zu einem öffentlichen News-Artikel",
+                    "Urlaubsfotos"
                 ],
                 [0,1], // Korrekte Antwort: B
-                "Falsch! Vertrauliche Geschäftsinformationen sollten niemals in sozialen Netzwerken geteilt werden – sie könnten missbraucht werden.",
+                "Falsch! Vertrauliche Geschäftsinformationen sollten niemals in sozialen Netzwerken geteilt werden – sie könnten missbraucht werden. Die Namen der Kollegen sind - ähnlich wie ein Organigramm - intern",
                 "Richtig! Vertrauliche Geschäftsinformationen gehören nicht in soziale Netzwerke, da sie ein Sicherheitsrisiko darstellen."
             );
         }else{
@@ -143,70 +239,70 @@ export class QuizScene extends Scene {
             quizManager.addQuestion(
                 "Welche Anzeichen deuten auf eine Phishing-E-Mail hin?",
                 [
-                    "A) Dringende Aufforderung zum Handeln",
-                    "B) Unerwartete Anhänge oder Links",
-                    "C) Absenderadresse mit Tippfehlern oder unbekannter Domain",
-                    "D) Perfekte Grammatik und professionelle Formulierung"
+                    "Dringende Aufforderung zum Handeln",
+                    "Unerwartete Anhänge oder Links",
+                    "Absenderadresse mit Tippfehlern oder unbekannter Domain",
+                    "Perfekte Grammatik und professionelle Formulierung"
                 ],
                 [0, 1, 2], // Korrekte Antworten: A, B, C
-                "Falsch! Nicht jede gut geschriebene E-Mail ist sicher – prüfe die Absenderadresse und Anhänge!",
-                "Richtig! Phishing-Mails erzeugen Druck, enthalten verdächtige Anhänge und oft gefälschte Absender."
+                "Falsch! Phishing-Mails erzeugen Druck, enthalten verdächtige Anhänge und oft gefälschte Absender. Perfekte Grammatik ist eher untypisch, aber natürlich nicht unmöglich.",
+                "Richtig! Phishing-Mails erzeugen Druck, enthalten verdächtige Anhänge und oft gefälschte Absender. Aber auch nicht jede gut geschriebene E-Mail ist  zwingend sicher!"
             );
             quizManager.addQuestion(
                 "Was ist eine Spear-Phishing-Attacke?",
                 [
-                    "A) Eine breit gestreute E-Mail-Kampagne",
-                    "B) Eine gezielte E-Mail an eine bestimmte Person oder Abteilung",
-                    "C) Eine Phishing-Mail mit persönlichem Bezug zum Empfänger",
-                    "D) Eine E-Mail von einem echten Unternehmen ohne Schadsoftware"
+                    "Eine breit gestreute E-Mail-Kampagne",
+                    "Eine gezielte E-Mail an eine bestimmte Person oder Abteilung",
+                    "Eine Phishing-Mail mit persönlichem Bezug zum Empfänger",
+                    "Eine Hochsee-Angelmethode"
                 ],
                 [1, 2], // Korrekte Antworten: B, C
                 "Falsch! Spear-Phishing ist eine gezielte Attacke, oft mit persönlichem Bezug.",
                 "Richtig! Spear-Phishing ist ein gezielter Angriff auf Einzelpersonen oder Abteilungen mit gut recherchierten Informationen."
             );
             quizManager.addQuestion(
-                "Was sind sinvolle Maßnahmen, um sich und andere vor Phishing zu schützen?",
+                "Was sind sinnvolle Maßnahmen, um sich und andere vor Phishing zu schützen?",
                 [
-                    "A) Unbekannte Links oder Anhänge nicht öffnen",
-                    "B) Absenderadresse und Schreibweise genau prüfen",
-                    "C) Mails von außerhalb des Unternehmens ignorieren",
-                    "D) Verdächtige E-Mails über den Phishing-Melde-Button melden"
+                    "Unbekannte Links oder Anhänge nicht öffnen",
+                    "Absenderadresse und Schreibweise genau prüfen",
+                    "Mails von außerhalb des Unternehmens ignorieren",
+                    "Verdächtige E-Mails über den Phishing-Melde-Button melden"
                 ],
                 [0, 1, 3], // Korrekte Antworten: A, B, D
-                "Falsch! Automatische Antworten können dich anfälliger für weitere Angriffe machen.",
-                "Richtig! Vorsicht bei Anhängen, Absenderprüfung und Melden verdächtiger E-Mails sind essenzielle Schutzmaßnahmen."
+                "Falsch! Vorsicht bei Anhängen! Absenderprüfung und Melden verdächtiger E-Mails sind essenzielle Schutzmaßnahmen. Aber alle Emails von Außerhalb dürfen natürlich nicht ignoriert werden.",
+                "Richtig! Vorsicht bei Anhängen! Absenderprüfung und Melden verdächtiger E-Mails sind essenzielle Schutzmaßnahmen."
             );
             quizManager.addQuestion(
                 "Welche Faktoren stärken die Sicherheit eines Passworts?",
                 [
-                    "A) hohe Anzahl an Zeichen (>14)",
-                    "B) Kombination aus Groß- und Kleinbuchstaben, Zahlen und Sonderzeichen",
-                    "C) leiche Einprägsamkeit durch Verwendung des eigenen Namens",
-                    "D) mehrfache Verwendung auf verschiedenen Websites"
+                    "Hohe Anzahl an Zeichen (>14)",
+                    "Kombination aus Groß- und Kleinbuchstaben, Zahlen und Sonderzeichen",
+                    "Leichte Einprägsamkeit durch Verwendung des eigenen Namens",
+                    "Mehrfache Verwendung auf verschiedenen Websites"
                 ],
-                [0, 1], // Korrekte Antworten: A, B, D
+                [0, 1], // Korrekte Antworten: A, B
                 "Falsch! Ein sicheres Passwort sollte lang, komplex und nicht einfach zu erraten sein.",
                 "Richtig! Länge, Komplexität und Passphrasen sind wichtige Elemente sicherer Passwörter."
             );
             quizManager.addQuestion(
                 "Was solltest du tun, wenn du dein Passwort aufschreiben musst?",
                 [
-                    "A) Es in einem Texdokument aufschreiben",
-                    "B) Es in einem Passwortmanager speichern",
-                    "C) Es in meinem Tagebuch notieren",
-                    "D) Es unter die Tastatur kleben"
+                    "Es in einem Textdokument aufschreiben",
+                    "Es in einem Passwortmanager speichern",
+                    "Es in meinem Tagebuch notieren",
+                    "Es unter die Tastatur kleben"
                 ],
                 [1], // Korrekte Antwort: B
-                "Falsch! Passwörter sollten niemals offen oder ungesichert aufbewahrt werden.",
+                "Falsch! Passwörter sollten niemals offen oder ungesichert aufbewahrt werden. Das Tagebuch ist auch nicht mit Passwort abgesichert.",
                 "Richtig! Ein Passwortmanager bietet eine sichere Möglichkeit, Passwörter zu speichern."
             );
             quizManager.addQuestion(
                 "Was ist ein Keylogger?",
                 [
-                    "A) Ein Tool, das Tastatureingaben aufzeichnet",
-                    "B) Ein Sicherheitssystem für Bürogebäude",
-                    "C) Ein Programm zur Verschlüsselung von Passwörtern",
-                    "D) Eine Methode zum Schutz vor Phishing-Angriffen"
+                    "Ein Tool, das Tastatureingaben aufzeichnet",
+                    "Ein Sicherheitssystem für Bürogebäude",
+                    "Ein Programm zur Verschlüsselung von Passwörtern",
+                    "Eine Methode zum Schutz vor Phishing-Angriffen"
                 ],
                 [0], // Korrekte Antwort: A
                 "Falsch! Ein Keylogger zeichnet Tastatureingaben auf und wird oft für Cyberangriffe genutzt.",
@@ -215,10 +311,10 @@ export class QuizScene extends Scene {
             quizManager.addQuestion(
                 "Welche der folgenden Verhaltensweisen erhöhen die Sicherheit am Arbeitsplatz?",
                 [
-                    "A) Bildschirmsperre aktivieren, wenn du den Arbeitsplatz verlässt",
-                    "B) Fremde Personen ins Gebäude lassen, wenn sie einen guten Grund haben",
-                    "C) USB-Sticks aus unbekannten Quellen verwenden",
-                    "D) Sicherheitsbewusstsein durch regelmäßige Schulungen stärken"
+                    "Bildschirmsperre aktivieren, wenn du den Arbeitsplatz verlässt",
+                    "Fremde Personen ins Gebäude lassen, wenn sie einen guten Grund haben",
+                    "USB-Sticks aus unbekannten Quellen verwenden",
+                    "Sicherheitsbewusstsein durch regelmäßige Schulungen stärken"
                 ],
                 [0, 3], // Korrekte Antworten: A, D
                 "Falsch! Unbekannte USB-Sticks und unkontrollierter Zugang sind große Sicherheitsrisiken.",
@@ -227,46 +323,46 @@ export class QuizScene extends Scene {
             quizManager.addQuestion(
                 "Welche Sicherheitsmaßnahmen helfen gegen Business-Email-Compromise-Angriffe?",
                 [
-                    "A) Bestätigung wichtiger Anfragen über einen zweiten Kanal",
-                    "B) Klick auf alle Links in E-Mails, um deren Sicherheit zu prüfen",
-                    "C) Überprüfen, ob die Absenderadresse korrekt ist",
-                    "D) Weiterleitung verdächtiger E-Mails an die IT-Sicherheitsabteilung"
+                    "Bestätigung wichtiger Anfragen über einen zweiten Kanal",
+                    "Aufrufen aller Links in E-Mails, um deren Sicherheit zu prüfen",
+                    "Überprüfen, ob die Absenderadresse korrekt ist",
+                    "Weiterleitung verdächtiger E-Mails an die IT-Sicherheitsabteilung"
                 ],
                 [0, 3], // Korrekte Antworten: A, C, D
                 "Falsch! Unüberlegtes Klicken auf Links kann gefährlich sein – prüfe immer die Echtheit.",
                 "Richtig! Doppelte Bestätigung & Meldung an die IT helfen, Business-Email-Compromise-Angriffe zu verhindern."
             );
             quizManager.addQuestion(
-                "Welche der folgenden Situationen könnten Social Engineering sein? (Mehrere Antworten möglich)",
+                "Welche der folgenden Situationen könnten Social Engineering sein?",
                 [
-                    "A) Ein Anruf von der IT-Abteilung, der nach deinem Passwort fragt.",
-                    "B) Eine E-Mail, die dich auffordert, auf einen Link zu klicken.",
-                    "C) Ein neuer Kollege, der dich um Hilfe",
-                    "D) Eine Nachricht in einem sozialen Netzwerk, die nach persönlichen Daten fragt."
+                    "Ein Anruf von der IT-Abteilung, der nach deinem Passwort fragt.",
+                    "Eine E-Mail, die dich auffordert, auf einen Link zu klicken.",
+                    "Ein neuer Kollege, der dich um Hilfe bittet.",
+                    "Eine Nachricht in einem sozialen Netzwerk, die nach persönlichen Daten fragt."
                 ],
                 [0, 1, 2, 3], // Korrekte Antworten: A, B, D
-                "Falsch! Alle diese Situationen könten potentiell gefährlich sein.",
+                "Falsch! Alle diese Situationen könnten potentiell gefährlich sein.",
                 "Richtig! Social Engineers können alle Formen der Kommunikation nutzen, um dich zu manipulieren."
             );
             quizManager.addQuestion(
                 "Was ist ein Ziel der Clean-Desk-Policy?",
                 [
-                    "A) Den Arbeitsplatz ästhetisch ansprechend zu gestalten.",
-                    "B) Vertrauliche Informationen vor unbefugtem Zugriff zu schützen.",
-                    "C) Die Nutzung von Papierdokumenten zu reduzieren.",
-                    "D) Die Anzahl der Schreibtische im Büro zu verringern."
+                    "Den Arbeitsplatz ästhetisch ansprechend zu gestalten.",
+                    "Vertrauliche Informationen vor unbefugtem Zugriff zu schützen.",
+                    "Die Nutzung von Papierdokumenten zu reduzieren.",
+                    "Die Anzahl der Schreibtische im Büro zu verringern."
                 ],
                 1, // Korrekte Antwort: B
                 "Falsch! Die Clean-Desk-Policy soll vertrauliche Informationen vor unbefugtem Zugriff schützen.",
                 "Richtig! Die Clean-Desk-Policy sorgt dafür, dass vertrauliche Informationen nicht offen herumliegen."
             );
             quizManager.addQuestion(
-                "Was ist Tailgatin?",
+                "Was ist Tailgating?",
                 [
-                    "A) Das unbefugte Mitgehen durch eine Tür oder Vereinzelungsanlage",
-                    "B) Ein Programm, welches Tastatureingaben abfängt und an den Angreifer weiterleitet",
-                    "C) Das Vortäuschen einer dem Opfer bekannten Person über Email",
-                    "D) Die Informationsbeschaffung im Vorfeld eines Social-Engineering-Angriffs"
+                    "Das unbefugte Mitgehen durch eine Tür oder Vereinzelungsanlage",
+                    "Ein Programm, welches Tastatureingaben abfängt und an den Angreifer weiterleitet",
+                    "Das Vortäuschen einer dem Opfer bekannten Person über Email",
+                    "Die Informationsbeschaffung im Vorfeld eines Social-Engineering-Angriffs"
                 ],
                 0, // Korrekte Antwort: A
                 "Falsch! Tailgating bedeutet, dass eine unbefugte Person durch eine Tür geht, die von jemand anderem geöffnet wurde.",
@@ -314,10 +410,12 @@ export class QuizScene extends Scene {
     }
 
     private setupQuestion() {
+
         this.clearPreviousElements();
         this.displayQuestion();
         this.displayOptions();
         this.createSubmitButton();
+        this.startTimer();
     }
 
     private clearPreviousElements() {
@@ -366,12 +464,12 @@ export class QuizScene extends Scene {
             });
 
             this.optionElements.push(optionText);
-            yPosition += 50;
+            yPosition += 60;
         });
     }
 
     private createSubmitButton() {
-        this.submitButton = this.add.text(100, 600, '> SUBMIT', {
+        this.submitButton = this.add.text(100, 600, '> Bestätigen', {
             fontFamily: 'Courier New',
             fontSize: '24px',
             color: '#00ff00',
@@ -403,8 +501,22 @@ export class QuizScene extends Scene {
     }
 
     private handleAnswerSubmission() {
+        this.stopTimer();
         quizManager.answerMultipleChoiceQuestion(this.currentQuestionIndex, this.selectedAnswers);
         const isCorrect = quizManager.isAnswerCorrect(this.currentQuestionIndex);
+        if (isCorrect) {
+            const timeBonus = this.timeLeft>0? 50:0;
+            this.score += 100 * this.combo + timeBonus; // Bonus für Serie
+            this.combo += 0.2; // Multiplikator erhöhen
+        } else {
+            this.combo = 1; // Reset bei falscher Antwort
+        }
+        if (this.timeLeft > 100) {
+            AchievementManager.unlockAchievement("quick_thinker", this.scene.get("UIScene"));
+        }
+        
+    
+        this.scoreText.setText(`${this.score}`);
         this.showQuestionFeedback(isCorrect);
     }
 
@@ -460,6 +572,7 @@ export class QuizScene extends Scene {
         if (this.currentQuestionIndex < quizManager.getTotalQuestions() - 1) {
             this.currentQuestionIndex++;
             this.setupQuestion();
+            this.updateProgressBar(); 
         } else {
             this.showFinalScore();
         }
@@ -471,6 +584,11 @@ export class QuizScene extends Scene {
         
         const score = quizManager.calculateScore();
         const total = quizManager.getTotalQuestions();
+
+        if (score === total) {
+            AchievementManager.unlockAchievement("perfect_quiz", this.scene.get("UIScene"));
+        }
+        
         
         this.add.text(100, 100, '> QUIZ COMPLETE', { 
             fontFamily: 'Courier New',
@@ -480,7 +598,15 @@ export class QuizScene extends Scene {
             strokeThickness: 2
         });
         
-        this.add.text(100, 150, `> SCORE: ${score}/${total}`, { 
+        this.add.text(100, 150, `> Richtig beantwortet: ${score}/${total}`, { 
+            fontFamily: 'Courier New',
+            fontSize: '28px', 
+            color: '#00ffff',
+            stroke: '#003300',
+            strokeThickness: 2
+        });
+
+        this.add.text(100, 200, `> SCORE: ${this.score}`, { 
             fontFamily: 'Courier New',
             fontSize: '28px', 
             color: '#00ffff',
@@ -488,8 +614,8 @@ export class QuizScene extends Scene {
             strokeThickness: 2
         });
         
-        // Restart option
-        this.continueText = this.add.text(100, 250, '> Continue', {
+        // Continue option
+        this.continueText = this.add.text(100, 300, '> Continue', {
             fontFamily: 'Courier New',
             fontSize: '24px',
             color: '#00ff00',
@@ -510,10 +636,54 @@ export class QuizScene extends Scene {
     }
 
     private continue() {
+        const phase = this.registry.get('phase') || 0;
+        if (phase === 1) {
+            // Wenn Phase 1, speichere die Antworten
+            this.registry.set('userAnswers1', quizManager.getUserAnswers());
+        } else {
+            // Andernfalls speichere die Antworten in der Datenbank
+            this.saveUserAnswersToDB();
+        }
+        console.log(quizManager.getUserAnswers().toString());
         quizManager.reset();
         this.currentQuestionIndex = 0;
         
         const nextScene = sceneManager.getNextScene();
         this.scene.start(nextScene?.key, nextScene?.data);
     }
+
+    // Funktion zum Speichern der Antworten als CSV
+    async saveUserAnswersToDB() {
+        console.log(this.registry.get('phase'));
+        // Hol die bisherigen Antworten aus 'userAnswers1'
+        const existingAnswers = this.registry.get('userAnswers1') || [];
+
+        // Hol die neuen Antworten aus quizManager
+        const newAnswers = quizManager.getUserAnswers();
+        console.log('new Version uploaded');
+        // Kombiniere die alten und neuen Antworten
+        const allUserAnswers = [...existingAnswers, ...newAnswers];
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('sid');
+    
+        try {
+            const response = await fetch('https://ls14-studi1.cs.tu-dortmund.de/api/save_answers.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_id: sessionId, // Session-ID mit senden
+                    answers: allUserAnswers
+                })
+            });
+    
+            if (!response.ok) throw new Error('Network response was not ok');
+            const result = await response.json();
+            console.log('Success:', result);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+    
 }

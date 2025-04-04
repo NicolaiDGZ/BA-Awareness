@@ -35,6 +35,10 @@ class QuizManager {
         return this.questions[index].options;
     }
 
+    getUserAnswers(){
+        return this.userAnswers;
+    }
+
     answerMultipleChoiceQuestion(index: number, selectedAnswers: boolean[]) {
         this.userAnswers[index] = selectedAnswers; // Speichert die Auswahl für die aktuelle Frage
     }

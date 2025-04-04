@@ -6,6 +6,7 @@ import  Bot  from './components/Bot';
 import  Player  from './components/Player';
 import { BodyType } from 'matter';
 import { sceneManager } from './components/SceneManager';
+import { AchievementManager } from './components/AchievementManager';
 
 export class Indoor extends Scene
 {
@@ -102,7 +103,7 @@ export class Indoor extends Scene
             { x: 9.5*32, y: 32.5*32 },//wp0
         ]);
         this.loadTurnstile();
-        this.loadCamera();
+        //this.loadCamera();
         this.setupInteractionZones();
     }
 
@@ -127,6 +128,9 @@ export class Indoor extends Scene
     }
 
     interact(){
+        if(!this.highlightObjects[12 - 1] && !this.highlightObjects[11 - 1]){
+            this.time.delayedCall(5000,() => AchievementManager.unlockAchievement('thorough', this));
+        }
         if(this.canPerformAction){
             const highlight = this.highlightObjects[this.interActionID - 1];
             if(Phaser.Input.Keyboard.JustDown(this.interActionKey)){
@@ -253,8 +257,25 @@ export class Indoor extends Scene
                         break;
                     }
                     case 11:{
-                        this.scene.start("SpearPhishingScene");
-                        this.scene.stop('InfoBoxScene');
+                        //Bathroom
+                        if(highlight){
+                            
+                            this.createSpeechBubble(10*32,14.5*32,180,50,"Schade, hätte ja sein können, dass sich zwei Mitarbeiter auf dem Klo über sensible Dinge unterhalten...",4200, this.player.getSprite());
+                        }
+                        break;
+                    }
+                    case 12:{
+                        //Kitchen
+                        if(highlight){
+                            this.createSpeechBubble(10*32,14.5*32,180,80,"Wie unordentlich, hier hinterlässt jemand seine Essensreste.\nWertvolle informationen bekomme ich daraus leider nicht.",4800, this.player.getSprite());
+                        }
+                        break;
+                    }
+                    case 13:{
+                        //Secretary
+                        if(highlight){
+                            this.createSpeechBubble(10.5*32,15*32,150,40,"Du musst Jonas sein.\nViel Erfolg bei deinem ersten Arbeitstag.",3000);
+                        }
                         break;
                     }
                     default:{
@@ -414,7 +435,10 @@ export class Indoor extends Scene
             { x: 10, y: 12 },
             { x: 4, y: 12 },
             { x: 7, y: 10 },
-            { x: 4.9, y: 17.3 }
+            { x: 4.9, y: 17.3 },
+            { x: 20, y: 16 },//bathroom
+            { x: 6, y: 4 },//kitchen
+            { x: 10, y: 17.3 },//secretary
         ]
 
         this.highlightObjects = [];
@@ -570,7 +594,7 @@ export class Indoor extends Scene
         this.infoText.setDepth(100);
     }
 
-    createSpeechBubble (x: number, y: number, width: number, height: number, quote: string, destroyTime: number)
+    createSpeechBubble (x: number, y: number, width: number, height: number, quote: string, destroyTime: number, target: Phaser.GameObjects.Sprite | undefined = undefined)
     {
         var bubbleWidth = width;
         var bubbleHeight = height;
@@ -611,7 +635,7 @@ export class Indoor extends Scene
         bubble.lineBetween(point2X, point2Y, point3X, point3Y);
         bubble.lineBetween(point1X, point1Y, point3X, point3Y);
 
-        var content = this.add.text(0, 0, quote, { fontFamily: 'Arial', fontSize: 20, color: '#000000', align: 'center', wordWrap: { width: bubbleWidth - (bubblePadding * 2) } });
+        var content = this.add.text(0, 0, quote, { fontFamily: 'Arial', fontSize: 10, color: '#000000', align: 'center', wordWrap: { width: bubbleWidth - (bubblePadding * 2) } });
 
         var b = content.getBounds();
 
@@ -619,7 +643,19 @@ export class Indoor extends Scene
 
         bubble.setDepth(101);
         content.setDepth(101);
-
         this.time.delayedCall(destroyTime,()=>{content.setVisible(false);content.destroy;bubble.setVisible(false);bubble.destroy;})
+
+        if(target != undefined){
+            this.time.addEvent({
+                delay: 10, // this will run in the next frame
+                loop: true,
+                callback: () => {
+                    // Follow the target's position
+                    bubble.setPosition(target.x, target.y - target.height / 1.5 - bubbleHeight); // Adjust as needed
+                    content.setPosition(bubble.x + (bubbleWidth / 2) - (b.width / 2), bubble.y + (bubbleHeight / 2) - (b.height / 2));
+                }
+            });
+        }
+        
     }
 }

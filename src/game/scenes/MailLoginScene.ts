@@ -1,5 +1,6 @@
 import { Scene } from "phaser";
 import { sceneManager } from "./components/SceneManager";
+import { AchievementManager } from "./components/AchievementManager";
 
 export class MailLoginScene extends Scene {
     private emailInput: any;
@@ -7,6 +8,9 @@ export class MailLoginScene extends Scene {
     private outputText: any;
     private validEmail: string = "dominik.diktat@g-neric.de";
     private validPassword: string = "DiktatMailPasswort";
+    currentLine: any;
+    passwordTry: number;
+    confirmButton: import("phaser").GameObjects.Text;
 
     constructor() {
         super({ key: "MailLoginScene" });
@@ -14,18 +18,16 @@ export class MailLoginScene extends Scene {
 
     create() {
         this.cameras.main.setBackgroundColor("#001100");
-        
-        this.registry.set('phase',3);
+        this.registry.set('phase', 3);
+        this.passwordTry = 0;
         const textStyle = {
             fontFamily: "Courier New",
             fontSize: "20px",
             color: "#00ff00",
             align: "left"
         };
-
+    
         let yPos = 50;
-
-        // Keylogger-Output
         const keylogOutput = [
             "> Keylogger active...",
             "> User clicked at [153,623]",
@@ -41,14 +43,41 @@ export class MailLoginScene extends Scene {
             "> genericmailserver.authenticate();",
             ">  //Anmeldung auf der Mail von Dominik Diktat"
         ];
-
-        keylogOutput.forEach((line) => {
-            this.add.text(50, yPos, line, textStyle);
-            yPos += 30;
-        });
-
+    
+        // Keylogger-Zeilen nacheinander einfügen
+        const showNextKeylog = () => {
+            if (this.currentLine < keylogOutput.length) {
+                this.add.text(50, yPos, keylogOutput[this.currentLine], textStyle);
+                yPos += 30;
+                this.currentLine++;
+        
+                if (this.currentLine < keylogOutput.length) {
+                    this.time.delayedCall(
+                        Math.floor(Math.random() * (2000 - 800 + 1)) + 800, // Zufälliger Delay zwischen 800 und 2000
+                        showNextKeylog, 
+                        [], 
+                        this
+                    );
+                } else {
+                    this.createLoginUI(yPos);
+                }
+            }
+        };
+        this.currentLine = 0;
+        showNextKeylog();
+    }
+    
+    private createLoginUI(yPos: number) {
+        console.log("createLoginUI");
+        const textStyle = {
+            fontFamily: "Courier New",
+            fontSize: "20px",
+            color: "#00ff00",
+            align: "left"
+        };
+    
         yPos += 20;
-
+    
         // Eingabefelder
         this.add.text(50, yPos, "> Enter email:", textStyle);
         this.emailInput = this.add.rexInputText(260, yPos + 8, 300, 30, {
@@ -61,7 +90,7 @@ export class MailLoginScene extends Scene {
             fontFamily: "Courier New"
         }).setOrigin(0, 0.5);
         yPos += 40;
-
+    
         this.add.text(50, yPos, "> Enter password:", textStyle);
         this.passwordInput = this.add.rexInputText(260, yPos + 8, 300, 30, {
             type: "password",
@@ -73,9 +102,9 @@ export class MailLoginScene extends Scene {
             fontFamily: "Courier New"
         }).setOrigin(0, 0.5);
         yPos += 150;
-
+    
         // Bestätigungsbutton
-        const confirmButton = this.add.text(512, yPos, "> CONFIRM", {
+        this.confirmButton = this.add.text(512, yPos, "> CONFIRM", {
             fontFamily: "Courier New",
             fontSize: "24px",
             color: "#00ff00",
@@ -84,12 +113,12 @@ export class MailLoginScene extends Scene {
         })
             .setOrigin(0.5)
             .setInteractive()
-            .on("pointerover", () => confirmButton.setColor("#00ffff"))
-            .on("pointerout", () => confirmButton.setColor("#00ff00"))
+            .on("pointerover", () => this.confirmButton.setColor("#00ffff"))
+            .on("pointerout", () => this.confirmButton.setColor("#00ff00"))
             .on("pointerdown", () => this.checkLogin());
-
+    
         this.tweens.add({
-            targets: confirmButton,
+            targets: this.confirmButton,
             scale: { from: 0.95, to: 1.05 },
             duration: 800,
             yoyo: true,
@@ -102,9 +131,23 @@ export class MailLoginScene extends Scene {
         const userPassword = this.passwordInput.text.trim();
 
         if (userEmail === this.validEmail && userPassword === this.validPassword) {
+            AchievementManager.unlockAchievement("career_3", this);
             this.showMessage("Sie werden eingeloggt...", true);
-        } else if (userEmail === this.validEmail && userPassword != this.validPassword){
+        } else if (userEmail === this.validEmail && userPassword != this.validPassword && this.passwordTry == 0){
             this.showMessage("Passwort falsch, probiere es erneut.", false);
+            this.passwordTry++;
+        }else if (userEmail === this.validEmail && userPassword != this.validPassword && this.passwordTry == 1){
+            this.showMessage("Passwort falsch, schaue dir den Aufbau des gehackten Passworts an", false);
+            this.passwordTry++;
+        }else if (userEmail === this.validEmail && userPassword != this.validPassword && this.passwordTry == 2){
+            this.showMessage("Passwort falsch. Tipp: Wo möchtest du dich anmelden.", false);
+            this.passwordTry++;
+        }else if (userEmail === this.validEmail && userPassword != this.validPassword && this.passwordTry == 3){
+            this.showMessage("Passwort falsch, probiere es mit 'Mail'.", false);
+            this.passwordTry++;
+        }else if (userEmail === this.validEmail && userPassword != this.validPassword && this.passwordTry > 3){
+            this.showMessage("Das richtige Passwort ist 'DiktatMailPasswort'", false);
+            this.passwordTry++;
         }else if (userEmail != this.validEmail && userPassword === this.validPassword){
             this.showMessage("Mail falsch, probiere es erneut.", false);
         }else{
@@ -113,6 +156,7 @@ export class MailLoginScene extends Scene {
     }
 
     showMessage(message: string, success: boolean) {
+        this.confirmButton.setVisible(false);
         const screenWidth = 1024;
         const screenHeight = 768;
         this.passwordInput.visible = false;
@@ -147,6 +191,7 @@ export class MailLoginScene extends Scene {
             background.destroy();
             resultText.destroy();
             
+            this.confirmButton.setVisible(true);
             this.passwordInput.visible = true;
             this.emailInput.visible = true;
             blinkingCursor.destroy();

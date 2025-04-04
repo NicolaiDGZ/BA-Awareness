@@ -112,6 +112,12 @@ export class PopupScene extends Scene {
                 this.scene.stop();
             });
 
+
+            const enterKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+            enterKey.on('down', () => {this.scene.resume(this.returnScene);
+                customEmitter.emit(TASK_EVENTS.SET_VISIBLE);
+                this.scene.stop();});
+
             
 
         // Animate elements in

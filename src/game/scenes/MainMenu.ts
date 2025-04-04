@@ -1,5 +1,7 @@
 import { GameObjects, Scene } from 'phaser';
 import { sceneManager } from './components/SceneManager';
+import { QuizScene } from './QuizScene';
+import { AchievementManager } from './components/AchievementManager';
 
 export class MainMenu extends Scene {
     private background: GameObjects.Image;
@@ -14,6 +16,10 @@ export class MainMenu extends Scene {
         this.createBackground();
         this.createTitle();
         this.createButtons();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('sid');
+        console.log(sessionId);
     }
 
     private createBackground() {
@@ -23,7 +29,7 @@ export class MainMenu extends Scene {
     }
 
     private createTitle() {
-        this.title = this.add.text(this.scale.width / 2, 100, 'Main Menu', {
+        this.title = this.add.text(this.scale.width / 2, 175, 'Hackie Chan\nvs\nG-Neric Corp', {
             fontFamily: 'Arial Black',
             fontSize: '64px',
             color: '#ffffff',
@@ -42,6 +48,7 @@ export class MainMenu extends Scene {
     }
 
     private createButtons() {
+        
         const buttonData = [
             { text: 'Spielen', scene: 'InfoScreen' },
             //{ text: 'Steuerung', scene: 'VisitorPass' },
@@ -52,7 +59,7 @@ export class MainMenu extends Scene {
         ];
 
         this.buttons = buttonData.map((data, index) => {
-            const button = this.add.text(this.scale.width / 2, 250 + index * 100, data.text, {
+            const button = this.add.text(this.scale.width / 2, 400 + index * 100, data.text, {
                 fontFamily: 'Arial Black',
                 fontSize: '32px',
                 color: '#ffffff',
@@ -67,6 +74,7 @@ export class MainMenu extends Scene {
                 console.log(`${data.text} button clicked`);
                 // Only start the Game scene for now
                 if (data.scene === 'Credits') {
+                    AchievementManager.unlockAchievement("game_start", this);
                     this.scene.start('InfoScreen', {
                         title: 'Credits',
                         message: 'Spielkonzept, Programmierung & co:\n\nNicolai Diehl\nnicolai.diehl@tuta.io\n\n\n\nAssets:\n\nLimeZu\nhttps://limezu.itch.io/',
@@ -77,6 +85,7 @@ export class MainMenu extends Scene {
                     //     //message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',
                     //     message: 'Als geschickter Social Engineer hast du ein klares Ziel: das Unternehmen G-Neric Corp zu infiltrieren. \nDoch der Zugang zum Firmengebäude ist nicht jedem gewährt – doch du bist bereit, jedes Schlupfloch zu finden. \nMit deinem Bus fährst du zum Gebäude, entschlossen, entscheidende Informationen aufzuspüren, die dir den Weg ins Innere ebnen. \n Viel Erfolg!',
                     //     scene: 'Game'});
+                    AchievementManager.unlockAchievement("career_1", this);
                     this.fillSceneManager();
                     const nextScene = sceneManager.getNextScene();
                     this.scene.start(nextScene?.key, nextScene?.data);
@@ -91,9 +100,9 @@ export class MainMenu extends Scene {
     fillSceneManager() {
         sceneManager.pushScene('InfoScreen', { 
             title: `Mission 1: Informationsbeschaffung`, 
-            message: `In diesem Spiel schlüpst du in die Rolle von Hackie Chan - einem Kriminellen, der sein Unterhalt durch Erpressung von Unternehmen verdient.
+            message: `In diesem Spiel schlüpst du in die Rolle von Hackie Chan - einem Kriminellen, der seinen Unterhalt durch Erpressung von Unternehmen verdient.
             Als geschickter Social Engineer hast du ein neues Ziel: das Unternehmen G-Neric Corp zu infiltrieren.
-            Doch der Zugang zum Firmengebäude ist nicht jedem gewährt – doch du bist bereit, jedes Schlupfloch zu finden.
+            Doch der Zugang zum Firmengebäude ist nicht jedem gewährt – doch du bist bereit, jedes Schlupfloch zu finden.{break}
 
             Mit deinem Bus fährst du zum Gebäude, entschlossen, entscheidende Informationen aufzuspüren, die dir den Weg ins Innere ebnen.
 
@@ -138,7 +147,7 @@ export class MainMenu extends Scene {
             title: `Soziale Netzwerke`, 
             message: `{image: socialMediaPost}` 
         });
-        //Social Media Post with a photo of an employee card
+        //Social Media Post with a photo of an employee card Caption: Thre more logins and start of holiday
         
         sceneManager.pushScene('InfoScreen', { 
             title: `Soziale Netzwerke`, 
@@ -154,11 +163,11 @@ export class MainMenu extends Scene {
         sceneManager.pushScene('InfoScreen', { 
             title: `Rückblick`, 
             message: `Hervorragend! Deine Mitarbeiterkarte sieht täuschend echt aus!
-            Sicherheitssalber schreibst du an die Mail von Jonas Federer die Nachricht, dass sich sein erster Arbeitstag einige Tage nach hinten verschiebt.
+            Sicherheitshalber schreibst du an die Mail von Jonas Federer die Nachricht, dass sich sein erster Arbeitstag einige Tage nach hinten verschiebt.
             Nicht, dass er noch deine Pläne durchkreuzt.
-
+            
             Wichtig:
-            Nur durch das unsichere Verhalten von Mitarbeitenden konntest du soweit kommen.
+            Nur durch das unsichere Verhalten von Mitarbeitenden konntest du so weit kommen.
             In dieser Lektion wurden folgende Themen der Informationssicherheit angesprochen:` 
         });
         
@@ -168,15 +177,15 @@ export class MainMenu extends Scene {
             \t- Öffentlich: Für alle zugänglich (z.B. Produktflyer)
             \t- Intern: Nur für Mitarbeitende (z.B. Organigramm)
             \t- Vertraulich: Begrenzter Zugriff (z.B. Kaufvertrag)
-            \t- Streng vertraulich: Höchster Schutz (z.B. Kundendaten)
+            \t- Streng vertraulich: Höchster Schutz (z.B. Kundendaten){break}
     
             - Abhängig der Klassifizierung müssen die Informationsträger entsorgt werden:
             \t- Digitale Speichermedien in der Datenschutztonne entsorgen
-            \t- Dokumente ab Stufe intern nicht im Papiermüll entsorgen
+            \t- Dokumente ab Stufe intern nicht im Papiermüll entsorgen{break}
             
             - Daten dürfen nur an autorisierte Dritte (Personen & Dienste) weitergegeben werden
             - Vertrauliche Daten verschlüsselt speichern und übermitteln
-            - Bei Unsicherheit: Immer nachfragen!` 
+            - Bei Unsicherheit: Bei Vorgesetzten oder Helpdesk nachfragen!` 
         });
         
         sceneManager.pushScene('InfoScreen', { 
@@ -184,7 +193,7 @@ export class MainMenu extends Scene {
             message: `
             - Was sind öffentliche Bereiche?
             \t- Im & ums Büro: Flure, Aufzüge, Cafetarias, Parkplätze etc.
-            \t- Außerhalb: Cafés, Flughäfen, öffentliche Verkehrsmittel
+            \t- Außerhalb: Cafés, Flughäfen, öffentliche Verkehrsmittel{break}
             
             - Keine vertraulichen Gespräche in öffentlichen Bereichen - du weißt nie, ob Hackie Chan nicht in ner Nähe ist ;)
             - Nutzung des Sichtschutzfilters für Laptops
@@ -201,8 +210,23 @@ export class MainMenu extends Scene {
         
         sceneManager.pushScene('InfoScreen', { 
             title: `Quiz`, 
-            message: `Teste im folgenden Quiz dein Wissen, bevor es zur nächsten Mission weitergeht.
-            Es kann sowohl eine, als auch mehrere Antworten richtig sein.` 
+            message: `Bist du bereit für ein Quiz-Challenge?
+            Bevor es mit der nächsten Mission weitergeht, kannst du hier dein Wissen testen und Punkte sammeln.
+            {break}
+            So geht’s:
+
+                \t- Es kann eine oder mehrere Antworten richtig sein – also aufgepasst!
+                \t- 100 Punkte gibt’s pro richtige Antwort.
+                \t- Streak: Wenn du mehrere Fragen hintereinander richtig beantwortest, steigt dein Punkte-Multiplikator
+                \t- Schnellbonus: Beantworte eine Frage in unter 15 Sekunden und kassiere 50 Extrapunkte obendrauf.
+            {break}
+            Profi-Tipp:
+            Du kannst die Tastatur nutzen, um noch flotter zu sein:
+
+                \t- Zahlen 1-4 für die Antwortauswahl
+                \t- Enter zum Bestätigen
+
+            Viel Erfolg!` 
         });
         
         sceneManager.pushScene('QuizScene');
@@ -210,7 +234,7 @@ export class MainMenu extends Scene {
         
         sceneManager.pushScene('InfoScreen', { 
             title: `Mission 2: Dirty Desk`, 
-            message: `Begebe dich mit deinem Besucherausweis in das Bürogebäude. Suche auch hier nach nützlichen Informationen.
+            message: `Begebe dich mit deinem Mitarbeiterauswei in das Bürogebäude. Suche auch hier nach nützlichen Informationen.
             Hinweis: Durchsuchbare Orte leuchten leicht gelblich.` 
         });
         
@@ -258,7 +282,7 @@ export class MainMenu extends Scene {
             title: `Spear Phishing`, 
             message: `Durch deinen künstlich erzeugten Zeitdruck der Anmeldefrist hat Herr Diktat schnell auf deine E-Mail geantwortet.
             Mit dem Anhang der Mail - dem Anmeldeformular - konntest du einen Keylogger auf dem Rechner des Vorgesetzten installieren.
-            Ein Keylogger ist ein Programm, welches alle Tastatureingaben des Nutzers mitliest, aufzeichnet und an den Angreifer übermittelt.
+            Ein Keylogger ist ein Programm, welches alle Tastatureingaben des Nutzers mitliest, aufzeichnet und an den Angreifer übermittelt.{break}
 
             Während du wartest formulierst du deinen weiteren Plan aus:
             Als nächstes führst du eine "Buisness-Email-Compromise"-Atacke durch: Dafür schickst du eine Mail im Namen von Herrn Diktat an den Server Administrator und nutze das geplanten Update als Vorwand, um an das Server-Passwort zu kommen.
@@ -269,7 +293,7 @@ export class MainMenu extends Scene {
             ` 
         });
         sceneManager.pushScene('MailLoginScene');
-        //User has to bruteforce/guess right password
+        //User gets feedback from a keylogger (a password to a different side) and has to "guess" the right password for the mail
         sceneManager.pushScene('SpearPhishingScene'); // phase 3
         //same as before, just to a new person
         
@@ -288,14 +312,14 @@ export class MainMenu extends Scene {
         
                       - Zugangskontrollen:
                       \t- Sicherheitspersonal, Schlüsselkarten oder Vereinzelungsanlagen verhindern unbefugten Zutritt.
-                      \t- Halte niemals aus Höflichkeit Türen für fremde Personen offen ("Tailgating": unbefugtes Mitgehen durch Türen).
-                      \t- Besucher sollten stets registriert und begleitet werden, um potenzielle Angriffe zu erschweren.
+                      \t- Halte niemals aus Höflichkeit Türen für fremde Personen auf ("Tailgating": unbefugtes Mitgehen durch Türen).
+                      \t- Besuchende sollten stets registriert und begleitet werden, um potenzielle Angriffe zu erschweren.{break}
         
                       - Clean-Desk-Policy:
                       \t- Entferne alle Dokumente, Notizen oder USB-Sticks von deinem Schreibtisch, wenn du ihn verlässt.
                       \t- Sperre deinen Bildschirm, wenn du deinen Arbeitsplatz verlässt (Windows-Taste + L).
                       \t- Lasse keine vertraulichen Dokumente oder Geräte unbeaufsichtigt.
-                      \t- Nutze abschließbare Schubladen oder Schränke für interne oder sesiblere Unterlagen.
+                      \t- Nutze abschließbare Schubladen oder Schränke für interne oder sensiblere Unterlagen.
                       `
         });
         sceneManager.pushScene('InfoScreen', { 
@@ -305,43 +329,39 @@ export class MainMenu extends Scene {
               \t- Absenderadressen genau prüfen (z. B. Tippfehler oder falsche Domains).
               \t- Druckvolle Sprache ("Dringend!", "Sofort handeln!") ist oft ein Warnzeichen.
               \t- Grammatik- und Rechtschreibfehler können auf Phishing hindeuten.
-              \t- Unpersönliche Ansprache wie "Sehr geehrter Nutzer" statt Ihres Namens.
-              \t- Aufforderungen zu ungewöhnlichen Handlungen (z. B. "Klicken Sie hier, um Ihr Konto zu reaktivieren").
+              \t- Unpersönliche Ansprache wie "Sehr geehrter Nutzer" statt des eigenen Namens.
+              \t- Aufforderungen zu ungewöhnlichen Handlungen (z. B. "Klicken Sie hier, um Ihr Konto zu reaktivieren").{break}
 
               - Was tun bei verdächtigen E-Mails:
               \t- Anhänge oder Links nicht öffnen.
               \t- E-Mail über "Phishing-Melden-Button" melden.
 
-              Denken Sie daran: Phishing-Angriffe zielen darauf ab, Sie zu täuschen. Seien Sie wachsam und melden Sie verdächtige Aktivitäten!` 
+              Denke daran: Phishing-Angriffe zielen darauf ab, dich zu täuschen. Sei wachsam und melde verdächtige Aktivitäten!` 
         });
         sceneManager.pushScene('InfoScreen', { 
             title: "Spear Phishing", 
-            message: ` Was ist Spear Phishing?
+            message: ` Was ist Spear Phishing verglichen mit Phishing?
               \t- Gezielte Angriffe auf Einzelpersonen oder Abteilungen.
               \t- Angreifer sammeln vorab Informationen (z. B. aus sozialen Netzwerken).
-              \t- E-Mails wirken oft persönlich und vertrauenswürdig.
+              \t- E-Mails wirken oft persönlich und vertrauenswürdig.{break}
 
-              - Wie erkenne ich Spear Phishing?
-              \t- E-Mails, die persönliche Informationen enthalten (z. B. Namen, Projekte).
-              \t- Aufforderungen zu dringenden Handlungen (z. B. "Überweisen Sie sofort Geld").
-              
               - Was tun bei verdächtigen E-Mails?
               \t- Anhänge oder Links nicht öffnen.
               \t- Absender über einen separaten Kanal verifizieren (z. B. Telefon oder internen Chat).
-              \t- Und wieder: Melden!!`  
+              \t- Und wieder: Melden!`  
         });
         sceneManager.pushScene('InfoScreen', { 
             title: "Passwortsicherheit", 
             message: `- Erstellung sicherer Passwörter:
                       \t- Verwende mindestens 14 Zeichen.
                       \t- Kombiniere Groß- und Kleinbuchstaben, Zahlen und Sonderzeichen.
-                      \t- Vermeide leicht zu erratende Informationen (z. B. Namen, Geburtsdaten).
+                      \t- Vermeide leicht zu erratende Informationen (z. B. Namen, Geburtsdaten).{break}
 
                       - Umgang mit Passwörtern:
                       \t- Verwende für jedes Konto ein eindeutiges Passwort.
                       \t- Teile Passwörter niemals mit anderen – auch nicht mit Kollegen.
                       \t- Schreibe Passwörter nicht auf oder speichere sie unverschlüsselt.
-                      \t- Falls nötig, verwende einen Passwortmanager.
+                      \t- Falls nötig, verwende einen Passwortmanager.{break}
         
                       - Multi-Faktor-Authentifizierung (MFA):
                       \t- Aktiviere MFA, wo immer möglich.
@@ -351,12 +371,12 @@ export class MainMenu extends Scene {
             title: "Tipp: Passphrasen statt Passwörter", 
             message: `- Was sind Passphrasen?
                       \t- Passphrasen sind lange Sätze oder Wortkombinationen.
-                      \t- Beispiel: "MeinHundLiebt3Leckerlis!" statt "Hund123".
+                      \t- Beispiel: "MeinHundLiebt3Leckerlis!" statt "Hund123".{break}
         
                       - Warum sind Passphrasen besser/sicherer als Passwörter?
                       \t- Länger als herkömmliche Passwörter → schwerer zu knacken.
                       \t- Einfach zu merken, da sie wie ein Satz oder eine Geschichte sind.
-                      \t- Schwer zu erraten, wenn sie kreativ gewählt sind (keine gängigen Phrasen oder Zitate).
+                      \t- Schwer zu erraten, wenn sie kreativ gewählt sind (keine gängigen Phrasen oder Zitate).{break}
         
                       - Wie erstelle ich eine sichere Passphrase?
                       \t- Mindestens 3-5 zufällige Wörter kombinieren.
@@ -366,16 +386,11 @@ export class MainMenu extends Scene {
         });
         sceneManager.pushScene('InfoScreen', { 
             title: "Abschluss", 
-            message: `Teste zum Abschluss nocheinmal, was du aus der zweiten Mission des Spiels gelernt hast.`
+            message: `Teste zum Abschluss noch einmal, was du aus der zweiten Mission des Spiels gelernt hast.`
         });
         sceneManager.pushScene('QuizScene');
-        sceneManager.pushScene('InfoScreen', { 
-            title: "Danke", 
-            message: `Vielen Dank, dass du dir die Zeit genommen hast, bis zum Ende zu spielen.
-
-            Ich hoffe es hat dir Spaß gemacht und du konntest etwas mitnehmen.`
-        });
-        sceneManager.pushScene('MainMenu');
+        
+        sceneManager.pushScene('ThankYouScreen');
         //quiz again
     }
     

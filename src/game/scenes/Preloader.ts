@@ -48,6 +48,7 @@ export class Preloader extends Scene
         this.load.image('cb_true','ui/checkbox_true.png');
         this.load.image('nothingtofind','ui/nothingtofind.png');
         this.load.image('controls','ui/Controls.png');
+        this.load.image('trophy','ui/trophy.png');
         this.load.image('scanlines','scanlines.jpg');
 
         // Tilesets

@@ -15,6 +15,8 @@ import { PopupScene } from './scenes/PopupScene.ts';
 import { SpearPhishingScene } from './scenes/SpearPhishingScene.ts';
 import { FreeTextScene } from './scenes/FreeTextScene.ts';
 import { MailLoginScene } from './scenes/MailLoginScene.ts';
+import ThankYouScreen from './scenes/ThankYouScreen.ts';
+import { UIScene } from './scenes/UIScene.ts';
 
 
 //  Find out more information about the Game Config at:
@@ -42,7 +44,9 @@ const config: Phaser.Types.Core.GameConfig = {
         PopupScene,
         SpearPhishingScene,
         FreeTextScene,
-        MailLoginScene
+        MailLoginScene,
+        ThankYouScreen,
+        UIScene
     ],
     physics: {
         default: 'matter',

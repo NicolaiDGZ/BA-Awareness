@@ -1,6 +1,7 @@
 import { Scene } from "phaser";
 import { sceneManager } from "./components/SceneManager";
 import { customEmitter, TASK_EVENTS } from "./components/events";
+import { AchievementManager } from "./components/AchievementManager";
 
 
 export class VisitorPass extends Scene {
@@ -31,7 +32,7 @@ export class VisitorPass extends Scene {
             .on('pointerdown', () => this.nextScene());
 
         // Document Options
-        const options = ['Notizen anzeigen','Visum anzeigen', 'Lebenslauf anzeigen', 'Social Media Post anzeigen'];
+        const options = ['Notizen anzeigen','Besucherausweis anzeigen', 'Lebenslauf anzeigen', 'Social Media Post anzeigen'];
         const images = ['notesVisitorPass', 'visitor_pass', 'cv', 'socialMediaPost'];
         let yPos = 130;
         
@@ -74,7 +75,7 @@ export class VisitorPass extends Scene {
         // Input Fields
         const inputConfig = {
             type: 'text',
-            placeholder: 'eingabe...',
+            placeholder: 'Eingabe...',
             fontSize: '20px',
             color: '#00ff00',
             backgroundColor: '#001100',
@@ -215,6 +216,7 @@ export class VisitorPass extends Scene {
     }
 
     private nextScene(){
+        AchievementManager.unlockAchievement("career_2", this);
         this.registry.set('phase', 1);
         const nextScene = sceneManager.getNextScene();
         this.scene.start(nextScene?.key,nextScene?.data);

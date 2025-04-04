@@ -6,6 +6,7 @@ export class FreeTextScene extends Scene {
     userText = "";
     title: string;
     textArea: any;
+    nextButton: import("phaser").GameObjects.Text;
     
     constructor() {
         super({ key: 'FreeTextScene' });
@@ -56,7 +57,7 @@ export class FreeTextScene extends Scene {
         }).setOrigin(0, 0);
 
         // Next Scene Button
-        const nextButton = this.add.text(512, 700, '> WEITER', {
+        this.nextButton = this.add.text(512, 700, '> WEITER', {
             fontFamily: 'Courier New',
             fontSize: '28px',
             color: '#00ff00',
@@ -65,15 +66,16 @@ export class FreeTextScene extends Scene {
         })
         .setOrigin(0.5)
         .setInteractive()
-        .on('pointerover', () => nextButton.setColor('#00ffff'))
-        .on('pointerout', () => nextButton.setColor('#00ff00'))
+        .on('pointerover', () => this.nextButton.setColor('#00ffff'))
+        .on('pointerout', () => this.nextButton.setColor('#00ff00'))
         .on('pointerdown', () => {
             console.log('Weiter clicked' + this.textArea.text.length);
+            this.nextButton.setVisible(false);
             this.continue(this.textArea.text.length > 20);
         });
 
         this.tweens.add({
-            targets: nextButton,
+            targets: this.nextButton,
             scale: { from: 0.95, to: 1.05 },
             duration: 800,
             yoyo: true,
@@ -98,7 +100,7 @@ export class FreeTextScene extends Scene {
     
         // Erfolgs- oder Fehlermeldung setzen
         const message = success 
-            ? "> Da sind doch schon konstruktive Ansätze dabei. \n\n Drücke Enter, um zu erfahren wie Hackie Chan die Situation löst." 
+            ? "> Für den Anfang gar nicht so schlecht. \n\n Drücke Enter, um zu erfahren, wie Hackie Chan die Situation löst." 
             : "> Bitte beschreibe deine Gedanken etwas ausführlicher.\n\nDrücke Enter, um fortzufahren";
     
         const resultText = this.add.text(screenWidth / 2 - 280, screenHeight / 2 - 50, message, textStyle);
@@ -118,7 +120,7 @@ export class FreeTextScene extends Scene {
             background.destroy();
             resultText.destroy();
             blinkingCursor.destroy();
-    
+            this.nextButton.setVisible(true);
             if (success) {
                 const nextScene = sceneManager.getNextScene();
                 this.scene.start(nextScene?.key, nextScene?.data);

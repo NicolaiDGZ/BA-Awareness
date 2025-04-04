@@ -1,3 +1,4 @@
+import { AchievementManager } from "./components/AchievementManager";
 import { sceneManager } from "./components/SceneManager";
 
 export class SpearPhishingScene extends Phaser.Scene {
@@ -54,7 +55,7 @@ export class SpearPhishingScene extends Phaser.Scene {
             { name: 'Von:', x: screenWidth/2, y: 120, height: 30, single: true },
             { name: 'An:', x: screenWidth/2, y: 170, height: 30, single: true },
             { name: 'Betreff:', x: screenWidth/2, y: 220, height: 30, single: true },
-            { name: '', x: screenWidth/2, y: 270, height: 400, single: false }
+            { name: '', x: screenWidth/2, y: 270, height: 400, single: false} 
         ];
         const zoneWidth = 350;
         zones.forEach(zone => {
@@ -88,6 +89,7 @@ export class SpearPhishingScene extends Phaser.Scene {
         // Snippets erstellen
         const phase = this.registry.get('phase');
         let snippets = [{ text: 'hans.dull@g-neric.de', column: 'right' ,position:-1, points:-1, zone: 'to'}];
+        let maxSnippets = 13;
         if(phase == 2){
             snippets = [
                 { text: 'hans.dull@g-neric.de', column: 'right' ,position:-1, points:-1, zone: 'to'},
@@ -132,7 +134,7 @@ export class SpearPhishingScene extends Phaser.Scene {
                 { text: 'aufkommen, brauche ich', column: 'left' ,position:6, points:10, zone: 'content'},
                 { text: 'Hallo Tina,', column: 'right' ,position:-1, points:-10, zone: 'content'},
                 { text: 'wie du ja weißt, kommt', column: 'left' ,position:1, points:10, zone: 'content'},
-                { text: 'LG Tina Tippt', column: 'left',position:-1, points:-15, zone: 'content' },
+                { text: 'LG Tina', column: 'left',position:-1, points:-15, zone: 'content' },
                 { text: '📎ServerPasswort', column: 'left' ,position:-1, points:10, zone: 'content'},
                 { text: 'das Passwort des Accounts', column: 'left' ,position:7, points:-5, zone: 'content'},
                 { text: 'Sehr geehrter Herr Diktat,', column: 'right' ,position:-1, points:15, zone: 'content'},
@@ -144,7 +146,7 @@ export class SpearPhishingScene extends Phaser.Scene {
                 { text: 'Damit keine Probleme', column: 'left', position: 5, points:-10, zone: 'content'},
                 { text: '"Band & Breite GmbH"', column: 'left' ,position:-1, points:5, zone: 'content'},
                 { text: '"Security made Easy".', column: 'left',position:4, points: -5, zone: 'content' },
-                { text: 'LG Dominik Diktat', column: 'right',position:10, points:10, zone: 'content' },
+                { text: 'LG Dominik', column: 'right',position:10, points:10, zone: 'content' },
             ];
         }
         
@@ -189,36 +191,47 @@ export class SpearPhishingScene extends Phaser.Scene {
 
         this.input.on('dragend', (pointer: any, gameObject: any, dropped: boolean) => {
             if (!dropped) {
+               
                 this.returnToColumn(gameObject);
                 gameObject.setBackgroundColor('#222222');
             }
         });
 
         this.input.on('drop', (_pointer: any, gameObject: any, dropZone: any) => {
-            const snippetsInZone = dropZone.getData('snippets');
+            let snippetsInZone = dropZone.getData('snippets');
             const isSingle = dropZone.getData('single');
-            gameObject.setBackgroundColor('#222222');
-            if (isSingle && snippetsInZone.length > 0) { //Single zone already full
+        
+            // Maximale Anzahl prüfen
+            console.log(snippetsInZone.length + " " + maxSnippets);
+            if (!isSingle && snippetsInZone.length >= maxSnippets) {
                 this.returnToColumn(gameObject);
                 return;
             }
-
+        
+            gameObject.setBackgroundColor('#222222');
+            
+            if (isSingle && snippetsInZone.length > 0) { // Single-Zone schon belegt
+                this.returnToColumn(gameObject);
+                return;
+            }
+        
             const currentZone = gameObject.getData('currentZone');
-            if (currentZone) { //deleting from old zone
-                const currentSnippets = currentZone.getData('snippets').filter((s: any) => s !== gameObject);
-                currentZone.setData('snippets', currentSnippets);
-                this.arrangeSnippets(currentZone);
+            if (currentZone) {//Snippet war vorher in einer Zone
                 const icon = currentZone.getData('icon-' + gameObject.text);
                 if (icon) {
                     icon.destroy();
                 }
+                const prevSnippets = currentZone.getData('snippets')
+                .filter((s: any) => s !== gameObject);
+                currentZone.setData('snippets', prevSnippets);
+                this.arrangeSnippets(currentZone);
             }
-
+        
             gameObject.setData('currentZone', dropZone);
+            snippetsInZone = dropZone.getData('snippets');
             dropZone.setData('snippets', [...snippetsInZone, gameObject]);
             this.arrangeSnippets(dropZone);
-            // Icon hinzufügen
-            this.addIcon(gameObject, dropZone);
+            this.updateIcons(dropZone); // Icons für neue Zone aktualisieren
         });
 
         // Position der Buttons basierend auf der letzten DropZone
@@ -346,7 +359,7 @@ export class SpearPhishingScene extends Phaser.Scene {
                 backgroundColor: '#333',
                 wordWrap: { width: dropdownWidth - 20, useAdvancedWrap: true },
                 lineSpacing:20
-            }).setPadding(5).setFixedSize(dropdownWidth, 30).setInteractive().setVisible(false);
+            }).setPadding(5).setFixedSize(dropdownWidth, 30).setInteractive().setVisible(false).setDepth(100);
     
             optionText.on('pointerdown', () => {
                 scale = option.scale;
@@ -471,7 +484,7 @@ export class SpearPhishingScene extends Phaser.Scene {
         // Erfolgs- oder Fehlermeldung setzen
         const message = success 
             ? "> Das sieht täuschend echt aus! Drücke ENTER, um fortzufahren." 
-            : "> Das wirkt noch nicht plausibel! Drücke ENTER, um an der Mail weiter zu arbeitem.";
+            : "> Das wirkt noch nicht plausibel! Drücke ENTER, um an der Mail weiter zu arbeiten.";
     
         const resultText = this.add.text(screenWidth / 2 - 280, screenHeight / 2 - 50, message, textStyle);
         const blinkingCursor = this.add.text(screenWidth / 2 - 280, screenHeight / 2, "_", textStyle);
@@ -492,6 +505,7 @@ export class SpearPhishingScene extends Phaser.Scene {
             blinkingCursor.destroy();
     
             if (success) {
+                AchievementManager.unlockAchievement("career_3", this);
                 const nextScene = sceneManager.getNextScene();
                 this.scene.start(nextScene?.key, nextScene?.data);
             }
@@ -504,15 +518,21 @@ export class SpearPhishingScene extends Phaser.Scene {
     private arrangeSnippets(zone: any) {
         const snippets = zone.getData('snippets');
         const isSingle = zone.getData('single');
-        const startY = zone.y - (zone.height/2) + 15;
-
+        const startY = zone.y - (zone.height / 2) + 15;
+    
         snippets.forEach((snippet: any, index: number) => {
             if (isSingle) {
-                snippet.x = zone.x  + zone.width/2-5 - snippet.width/2;
+                snippet.x = zone.x + zone.width / 2 - 5 - snippet.width / 2;
                 snippet.y = zone.y;
             } else {
-                snippet.x = zone.x - zone.width/2+5 + snippet.width/2 + 30;
+                snippet.x = zone.x - zone.width / 2 + 5 + snippet.width / 2 + 30;
                 snippet.y = startY + (index * 30);
+                const oldIcon = zone.getData('icon-' + snippet.text);
+                if (oldIcon) {
+                    oldIcon.destroy();
+                    zone.setData('icon-' + snippet.text, null);
+                }
+                this.addIcon(snippet, zone); // Icon anpassen
             }
         });
     }
@@ -543,5 +563,22 @@ export class SpearPhishingScene extends Phaser.Scene {
             snippet.setBackgroundColor('#ff4141');
             
         }
+    }
+    private updateIcons(zone: any) {
+        const snippets = zone.getData('snippets');
+    
+        // Lösche alle alten Icons
+        snippets.forEach((snippet: any) => {
+            const oldIcon = zone.getData('icon-' + snippet.text);
+            if (oldIcon) {
+                oldIcon.destroy();
+                zone.setData('icon-' + snippet.text, null);
+            }
+        });
+    
+        // Neue Icons für verbleibende Snippets setzen
+        snippets.forEach((snippet: any) => {
+            this.addIcon(snippet, zone);
+        });
     }
 }
