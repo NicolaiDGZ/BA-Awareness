@@ -6,7 +6,7 @@ export class AchievementManager {
         //Karrierelevel
         "career_1": { title: "Anfänger", description: "[Karriere 1/4] \nStarte deine Karriere als Social Engineer.", unlocked: false },
         "career_2": { title: "Trickser", description: "[Karriere 2/4] \nMitarbeiterkarte erfolgreich gefälscht.", unlocked: false },
-        "career_3": { title: "Täuschungskünstler", description: "[Karriere 3/4] \nDu hast eine überzeugende Spearphishing-Mail erstellt.", unlocked: false },
+        "career_3": { title: "Täuschungskünstler", description: "[Karriere 3/4] \nDu hast eine überzeugende Mail erstellt.", unlocked: false },
         "career_4": { title: "Mastermind", description: "[Karriere 4/4] \nDu bist zum Profi-Social Engineer aufgestiegen.", unlocked: false },
         //Easter Eggs
         "joke": { title: "Schlechter Witz", description: "Du hast ein Easter-Egg gefunden und musstest einen schlechten Witz lesen.", unlocked: false },

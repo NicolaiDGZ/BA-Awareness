@@ -103,7 +103,7 @@ export class Indoor extends Scene
             { x: 9.5*32, y: 32.5*32 },//wp0
         ]);
         this.loadTurnstile();
-        //this.loadCamera();
+        this.loadCamera();
         this.setupInteractionZones();
     }
 
@@ -164,7 +164,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "sudoku", 
-                                imageScale: 0.5, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.bringToTop("PopupScene");
@@ -177,7 +177,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "architecture", 
-                                imageScale: 0.5, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.pause();
@@ -189,7 +189,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "photoCertificate", 
-                                imageScale: 0.22, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.pause();
@@ -201,7 +201,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "cameraShop", 
-                                imageScale: 0.8, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.pause();
@@ -213,7 +213,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "organigramm", 
-                                imageScale: 0.8, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.pause();
@@ -225,7 +225,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "crossword", 
-                                imageScale: 0.75, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.pause();
@@ -237,7 +237,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "summerparty", 
-                                imageScale: 0.3, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.pause();
@@ -249,7 +249,7 @@ export class Indoor extends Scene
                         if(highlight){
                             this.scene.launch("PopupScene", { 
                                 imageKey: "visitorlist", 
-                                imageScale: 0.8, 
+                                imageScale: 1, 
                                 returnScene: "Indoor" 
                             });
                             this.scene.pause();
@@ -267,7 +267,7 @@ export class Indoor extends Scene
                     case 12:{
                         //Kitchen
                         if(highlight){
-                            this.createSpeechBubble(10*32,14.5*32,180,80,"Wie unordentlich, hier hinterlässt jemand seine Essensreste.\nWertvolle informationen bekomme ich daraus leider nicht.",4800, this.player.getSprite());
+                            this.createSpeechBubble(10*32,14.5*32,180,50,"Ui, morgen wird's wohl Regen geben. \n Aber die Information hilft mir wohl nicht weiter.",4800, this.player.getSprite());
                         }
                         break;
                     }
@@ -432,7 +432,7 @@ export class Indoor extends Scene
             { x: 25, y: 1.5 },
             { x: 23, y: 1 },
             { x: 20, y: 2 },
-            { x: 10, y: 12 },
+            { x: 4.8, y: 7.2 },
             { x: 4, y: 12 },
             { x: 7, y: 10 },
             { x: 4.9, y: 17.3 },
@@ -448,16 +448,16 @@ export class Indoor extends Scene
                 .setRectangle(50, 50)
                 .setStatic(true)
                 .setSensor(true);
-    
-            this.tweens.add({
-                targets: highlight,
-                alpha: { from: 0.5, to: 1.0 },
-                scale: { from: 0.9, to: 1.1 },
-                duration: 1000,
-                yoyo: true,
-                repeat: -1
-            });
-    
+                // Tween für das Blinken mit dynamischem maxAlpha
+                this.tweens.add({
+                    targets: highlight,
+                    alpha: { from: 0.3, to: 1 },
+                    scale: { from: 0.9, to: 1.1 },
+                    duration: 1000,
+                    yoyo: true,
+                    ease: 'Sine.easeInOut',
+                    repeat: -1
+                });
             highlight.setOnCollideWith(this.player.getBody(), () => {
                 this.canPerformAction = true;
                 this.time.delayedCall(3000, this.showActionText.bind(this));
@@ -474,76 +474,47 @@ export class Indoor extends Scene
     }
 
     loadCamera(){
-        const camera = this.matter.add.sprite(17*32 + 16 ,0*32,'ts_a_seccamera')
+        const camera = this.matter.add.sprite(9*32 ,15.5*32,'ts_a_seccamera')
             .setStatic(true)
         this.anims.create({
             key: 'seccamera_moving',
             frames: this.anims.generateFrameNumbers('ts_a_seccamera', { start: 0, end: 9 }),
-            frameRate: 4,
-            repeat: -1
+            frameRate: 2,
         });
-        camera.anims.play('seccamera_moving');
-        const cameravision = this.matter.add.sprite(128,128,'ts_seccam_cone')
+        const cameravision = this.matter.add.sprite(camera.x,camera.y + 10,'ts_seccam_cone')
             .setOrigin(0.5,0)
-            .setScale(0.1)
-            .setRectangle(10,10);
-        
+            .setSensor(true)
+            .setScale(0.1);
 
-        this.cameraAngle = 0;
-        // Camera view triangle (Graphic)
-        this.cameraGraphic = this.add.graphics();
-        this.cameraGraphic.fillStyle(0xff0000, 0.5);
-        this.cameraGraphic.fillTriangle(400, 300, 380, 400, 420, 400);
-
-        // Camera Matter Body
-        const viewVertices = [{ x: 400, y: 300 }, { x: 380, y: 400 }, { x: 420, y: 400 }];
-        this.cameraSensor = this.matter.add.fromVertices(400, 300+66, viewVertices, {
-            isStatic: true,
-            isSensor: true, // Makes it a sensor to trigger collision events
-            label: 'camera',
-        });
-
-        this.time.addEvent({
-            delay: 30,
-            callback: this.rotateCamera,
-            callbackScope: this,
-            loop: true,
-        });
+            let direction = -1;
+            let angle =  45;
+            const angleMin =  - 45;
+            const angleMax =   45;
+            const rotationSpeed = 1.8 ; // Grad pro Frame (anpassen)
+            
+            // Update-Loop für die Sichtkegel-Rotation
+            this.time.addEvent({
+                delay: 50, // Geschwindigkeit der Bewegung
+                loop: true,
+                callback: () => {
+                    if(angle === angleMax){
+                        camera.anims.play('seccamera_moving');
+                    }
+                    angle += direction * rotationSpeed;
+                    if (angle >= angleMax || angle <= angleMin) {
+                        direction *= -1; // Richtung umkehren
+                    }
+                    
+            
+                    // Cameravision bewegen und rotieren (mit oben-mittigem Drehpunkt)
+                    cameravision.setRotation(Phaser.Math.DegToRad(angle));
+            
+                    // Position relativ zur Kamera aktualisieren
+                    cameravision.setPosition(camera.x - angle*0.1, camera.y + 10);
+                }
+            });
     }
 
-
-    rotateCamera() {
-        this.cameraAngle += this.direction * 0.02; // Update angle by direction
-
-        // Check angle limits
-        if (this.cameraAngle >= Phaser.Math.DegToRad(90)) {
-            this.direction = -1; // Reverse direction
-        } else if (this.cameraAngle <= 0) {
-            this.direction = 1; // Reverse direction
-        }
-
-        this.cameraAngle += 0.02; // Rotation speed
-        const rotationMatrix = Phaser.Math.RotateAround({ x: 380, y: 400 }, 400, 300, this.cameraAngle);
-        this.cameraSensor.position.x = rotationMatrix.x;
-        this.cameraSensor.position.y = rotationMatrix.y;
-    
-        // Sync Graphic with Matter Sensor (re-render triangle)
-        this.cameraGraphic.clear();
-        this.cameraGraphic.fillStyle(0xff0000, 0.5);
-        const p1 = { x: 400, y: 300 };
-        const p2 = Phaser.Math.RotateAround({ x: 380, y: 400 }, p1.x, p1.y, this.cameraAngle);
-        const p3 = Phaser.Math.RotateAround({ x: 420, y: 400 }, p1.x, p1.y, this.cameraAngle);
-    
-        this.cameraGraphic.fillTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
-    
-        // Update Matter Sensor Vertices
-        this.cameraSensor.vertices[0].x = p1.x;
-        this.cameraSensor.vertices[0].y = p1.y;
-        this.cameraSensor.vertices[1].x = p2.x;
-        this.cameraSensor.vertices[1].y = p2.y;
-        this.cameraSensor.vertices[2].x = p3.x;
-        this.cameraSensor.vertices[2].y = p3.y;
-    }
     loadTurnstile(){
         // Add a sprite for the turnstile and attach the composite body
         this.turnstile = this.matter.add.sprite(14*32,16*32,'ts_a_turnstile')

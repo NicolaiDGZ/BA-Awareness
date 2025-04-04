@@ -19,7 +19,10 @@ export class MainMenu extends Scene {
 
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('sid');
-        console.log(sessionId);
+
+        if (sessionId && /^\d+$/.test(sessionId) && Number(sessionId) > 0) {
+            console.log("sessionId ist eine positive Zahl:", sessionId);
+        }
     }
 
     private createBackground() {
@@ -51,15 +54,15 @@ export class MainMenu extends Scene {
         
         const buttonData = [
             { text: 'Spielen', scene: 'InfoScreen' },
-            //{ text: 'Steuerung', scene: 'VisitorPass' },
             { text: 'Credits', scene: 'Credits' },
-            //{ text: 'DevTest', scene: 'Indoor' },
-            //{ text: 'DevTestQuiz', scene: 'QuizScene' },
-            //{ text: 'DevTestPhishing', scene: 'SpearPhishingScene' }
+            { text: 'Ausweis fälschen', scene: 'VisitorPass' },
+            { text: 'Im Bürogebäude', scene: 'Indoor' },
+            { text: 'Quiz', scene: 'MailLoginScene' },
+            { text: 'Mail fälschen', scene: 'SpearPhishingScene' },
         ];
 
         this.buttons = buttonData.map((data, index) => {
-            const button = this.add.text(this.scale.width / 2, 400 + index * 100, data.text, {
+            const button = this.add.text(this.scale.width / 2, 400 + index * 50, data.text, { //index ist normal 100
                 fontFamily: 'Arial Black',
                 fontSize: '32px',
                 color: '#ffffff',
@@ -74,17 +77,17 @@ export class MainMenu extends Scene {
                 console.log(`${data.text} button clicked`);
                 // Only start the Game scene for now
                 if (data.scene === 'Credits') {
-                    AchievementManager.unlockAchievement("game_start", this);
+                    AchievementManager.unlockAchievement("quick_thinker", this);
                     this.scene.start('InfoScreen', {
                         title: 'Credits',
                         message: 'Spielkonzept, Programmierung & co:\n\nNicolai Diehl\nnicolai.diehl@tuta.io\n\n\n\nAssets:\n\nLimeZu\nhttps://limezu.itch.io/',
                         scene: 'MainMenu'});
                 }else if(data.scene === 'InfoScreen'){
-                    // this.scene.start(data.scene, {
-                    //     title: 'Informationen sammeln',
-                    //     //message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',
-                    //     message: 'Als geschickter Social Engineer hast du ein klares Ziel: das Unternehmen G-Neric Corp zu infiltrieren. \nDoch der Zugang zum Firmengebäude ist nicht jedem gewährt – doch du bist bereit, jedes Schlupfloch zu finden. \nMit deinem Bus fährst du zum Gebäude, entschlossen, entscheidende Informationen aufzuspüren, die dir den Weg ins Innere ebnen. \n Viel Erfolg!',
-                    //     scene: 'Game'});
+                    this.scene.start(data.scene, {
+                        title: 'Informationen sammeln',
+                        //message: 'Agent, deine Aufgabe: Sammle unauffällig Informationen bei G-Neric Corp. Als Social Engineer setzt du auf Täuschung statt Technik. Finde nützliche Details – ein Name, ein Passwort, ein Badge – alles kann wertvoll sein. Bleib wachsam, agiere clever, und vor allem: Bleib unsichtbar. Viel Erfolg!',
+                        message: 'Als geschickter Social Engineer hast du ein klares Ziel: das Unternehmen G-Neric Corp zu infiltrieren. \nDoch der Zugang zum Firmengebäude ist nicht jedem gewährt – doch du bist bereit, jedes Schlupfloch zu finden. \nMit deinem Bus fährst du zum Gebäude, entschlossen, entscheidende Informationen aufzuspüren, die dir den Weg ins Innere ebnen. \n Viel Erfolg!',
+                        scene: 'Game'});
                     AchievementManager.unlockAchievement("career_1", this);
                     this.fillSceneManager();
                     const nextScene = sceneManager.getNextScene();
@@ -98,6 +101,19 @@ export class MainMenu extends Scene {
         });
     }
     fillSceneManager() {
+        sceneManager.pushScene('InfoScreen', { 
+            title: `Spear Phishing`, 
+            message: `Durch deinen künstlich erzeugten Zeitdruck der Anmeldefrist hat Herr Diktat schnell auf deine E-Mail geantwortet.
+            Mit dem Anhang der Mail - dem Anmeldeformular - konntest du einen Keylogger auf dem Rechner des Vorgesetzten installieren.
+            Ein Keylogger ist ein Programm, welches alle Tastatureingaben des Nutzers mitliest, aufzeichnet und an den Angreifer übermittelt.{break}
+
+            Während du wartest formulierst du deinen weiteren Plan aus:
+            Als nächstes führst du eine "Buisness-Email-Compromise"-Atacke durch: Dafür schickst du eine Mail im Namen von Herrn Diktat an den Server Administrator und nutze das geplanten Update als Vorwand, um an das Server-Passwort zu kommen.
+
+            Doch bisher hat sich Herr Diktat noch nicht in sein Mail-Postfach angemeldet, aber die Zeit drängt: Die Server-Techniker kommen schon morgen!!
+            Gerade als du denkst, du musst deinen Plan aufgeben, meldet der Keylogger folgendes in der Konsole:
+            ` 
+        });
         sceneManager.pushScene('InfoScreen', { 
             title: `Mission 1: Informationsbeschaffung`, 
             message: `In diesem Spiel schlüpst du in die Rolle von Hackie Chan - einem Kriminellen, der seinen Unterhalt durch Erpressung von Unternehmen verdient.
@@ -285,11 +301,10 @@ export class MainMenu extends Scene {
             Ein Keylogger ist ein Programm, welches alle Tastatureingaben des Nutzers mitliest, aufzeichnet und an den Angreifer übermittelt.{break}
 
             Während du wartest formulierst du deinen weiteren Plan aus:
-            Als nächstes führst du eine "Buisness-Email-Compromise"-Atacke durch: Dafür schickst du eine Mail im Namen von Herrn Diktat an den Server Administrator und nutze das geplanten Update als Vorwand, um an das Server-Passwort zu kommen.
+            Als nächstes führst du eine "Business-Email-Compromise"-Atacke durch: Dafür schickst du eine Mail im Namen von Herrn Diktat an den Server Administrator und nutze das geplanten Update als Vorwand, um an das Server-Passwort zu kommen.
 
             Doch bisher hat sich Herr Diktat noch nicht in sein Mail-Postfach angemeldet, aber die Zeit drängt: Die Server-Techniker kommen schon morgen!!
             Gerade als du denkst, du musst deinen Plan aufgeben, meldet der Keylogger folgendes in der Konsole:
-            
             ` 
         });
         sceneManager.pushScene('MailLoginScene');

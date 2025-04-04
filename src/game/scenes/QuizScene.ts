@@ -171,7 +171,7 @@ export class QuizScene extends Scene {
                     "Keine vertraulichen Informationen in vollen Aufzügen besprechen"
                 ],
                 [1, 3], // Korrekte Antworten: B, D
-                "Falsch! Vertrauliche Gespräche in Hörweite von anderen und unbeaufsichtigte Dokumente sind ein Risiko. Nicht alle Kollegen sind für alle Informationswerte freigegeben.",
+                "Falsch! Vertrauliche Gespräche in Hörweite von anderen und unbeaufsichtigte Dokumente sind ein Risiko. Achte bei informationen auf die Freigabestufe, auch unter Kollegen.",
                 "Richtig! Sichtschutzfilter und das Vermeiden vertraulicher Gespräche in öffentlichen Bereichen schützen vor Datenlecks."
             );
             quizManager.addQuestion(
@@ -642,7 +642,12 @@ export class QuizScene extends Scene {
             this.registry.set('userAnswers1', quizManager.getUserAnswers());
         } else {
             // Andernfalls speichere die Antworten in der Datenbank
-            this.saveUserAnswersToDB();
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('sid');
+
+            if (sessionId && /^\d+$/.test(sessionId) && Number(sessionId) > 0) {
+                this.saveUserAnswersToDB();
+            }
         }
         console.log(quizManager.getUserAnswers().toString());
         quizManager.reset();

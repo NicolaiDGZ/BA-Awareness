@@ -313,16 +313,16 @@ export class SpearPhishingScene extends Phaser.Scene {
 
     createDropdownMenu(dropdownX: number, buttonY: number, openButtonX: number) {
         const options = [
-            { text: 'Architekturband', key: 'architecture', scale: 0.5 },
+            { text: 'Architekturband', key: 'architecture', scale: 1 },
             { text: 'Notiz Server 1', key: 'serverName', scale: 1.5 },
             { text: 'Notiz Server 2', key: 'serverNote', scale: 1.5 },
-            { text: 'Sudoku', key: 'sudoku', scale: 0.5 },
-            { text: 'Foto Urkunde', key: 'photoCertificate', scale: 0.22 },
-            { text: 'Bildschirm Vorgesetzter', key: 'cameraShop', scale: 0.8 },
-            { text: 'Organigramm', key: 'organigramm', scale: 0.8 },
-            { text: 'Kreuzworträtsel', key: 'crossword', scale: 0.75 },
-            { text: 'Sommerfest', key: 'summerparty', scale: 0.3 },
-            { text: 'Besucherliste', key: 'visitorlist', scale: 0.8 },
+            { text: 'Sudoku', key: 'sudoku', scale: 1 },
+            { text: 'Foto Urkunde', key: 'photoCertificate', scale: 1 },
+            { text: 'Bildschirm Vorgesetzter', key: 'cameraShop', scale: 1 },
+            { text: 'Organigramm', key: 'organigramm', scale: 1 },
+            { text: 'Kreuzworträtsel', key: 'crossword', scale: 1 },
+            { text: 'Sommerfest', key: 'summerparty', scale: 1 },
+            { text: 'Besucherliste', key: 'visitorlist', scale: 1 },
         ];
     
         let selectedKey = options[0].key;
